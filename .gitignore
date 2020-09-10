@@ -1,0 +1,12 @@
+plugin/CMakeCache.txt
+plugin/CMakeFiles/*
+plugin/cmake_install.cmake
+plugin/libs/*
+plugin/Makefile
+plugin/motions/*
+plugin/qrc_resources.cpp
+plugin/CMakeCache.txt
+plugin/src/moc_EITPlugin.cpp
+plugin/src/moc_EITPlugin.cpp_parameters
+plugin/src/resources.qrc.depends
+plugin/ui_plugin.h
