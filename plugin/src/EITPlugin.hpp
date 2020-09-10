@@ -21,9 +21,6 @@
 #include <rws/RobWorkStudioPlugin.hpp>
 #include <RobWorkStudioConfig.hpp> // For RWS_USE_QT5 definition
 
-// OpenCV 3
-#include <opencv2/opencv.hpp>
-
 // Qt
 #include "ui_EITPlugin.h"
 
@@ -42,19 +39,11 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         virtual void initialize();
 
     private slots:
-        void getImage();
-        void get25DImage();
-
         void stateChangedListener(const rw::kinematics::State& state);
 
         void home_button();
 
-        bool checkCollisions(rw::models::Device::Ptr device, const rw::kinematics::State &state, const rw::proximity::CollisionDetector &detector, const rw::math::Q &q);
-        void createPathRRTConnect(rw::math::Q from, rw::math::Q to, double extend, double maxTime);
-
     private:
-        static cv::Mat toOpenCVImage(const rw::sensor::Image& img);
-
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
         rw::models::Device::Ptr UR_left;
@@ -62,10 +51,6 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
-        rwlibs::simulation::GLFrameGrabber* _framegrabber;
-        rwlibs::simulation::GLFrameGrabber25D* _framegrabber25D;
-        std::vector<std::string> _cameras;
-        std::vector<std::string> _cameras25D;
 };
 
 #endif /*EITPLUGIN_HPP*/
