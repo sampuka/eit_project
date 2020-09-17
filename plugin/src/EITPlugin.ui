@@ -19,9 +19,9 @@
      <enum>Qt::AlignTop</enum>
     </property>
     <item>
-     <widget class="QLabel" name="ui_sample_label">
+     <widget class="QLabel" name="ui_status_label">
       <property name="text">
-       <string>Sample label</string>
+       <string>Status: ok</string>
       </property>
       <property name="textFormat">
        <enum>Qt::RichText</enum>
@@ -29,9 +29,26 @@
      </widget>
     </item>
     <item>
+     <widget class="QCheckBox" name="ui_checkbox_sync">
+      <property name="text">
+       <string>Sync with robot</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QPushButton" name="ui_home_button">
       <property name="text">
        <string>Home</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="ui_go_button">
+      <property name="text">
+       <string>Go! ..bwah!</string>
       </property>
      </widget>
     </item>
