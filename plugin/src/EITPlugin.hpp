@@ -44,10 +44,13 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void home_button();
 
     private:
+        // RobWork
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
-        rw::models::Device::Ptr UR_left;
-        rw::models::Device::Ptr UR_right;
+        rw::models::Device::Ptr UR_robot;
+
+        // UR Robot
+        std::string UR_IP = "1.2.3.4";
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
