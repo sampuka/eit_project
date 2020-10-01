@@ -7,6 +7,7 @@ EITPlugin::EITPlugin():
 
     // Connect UI components to member functions
     connect(ui_home_button, SIGNAL(pressed()), this, SLOT(home_button()));
+    connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
     //connect(_btn_im    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 }
 
@@ -102,4 +103,18 @@ void EITPlugin::stateChangedListener(const rw::kinematics::State& state)
 void EITPlugin::home_button()
 {
     std::cout << "Home button pressed!" << std::endl;
+}
+
+void EITPlugin::sync_pressed(bool checkbox_state)
+{
+    if (checkbox_state)
+    {
+        // Checkbox checked
+        // Read real UR position
+        // Set twin ur position
+    }
+    else
+    {
+        // Checkbox unchecked
+    }
 }

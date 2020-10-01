@@ -42,6 +42,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void stateChangedListener(const rw::kinematics::State& state);
 
         void home_button();
+        void sync_pressed(bool);
 
     private:
         rw::models::WorkCell::Ptr rws_wc;
