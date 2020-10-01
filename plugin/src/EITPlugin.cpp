@@ -69,8 +69,10 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             getRobWorkStudio()->getWorkCellScene()->addRender("BackgroundImage",_bgRender,bgFrame);
         }
 
-        UR_left = rws_wc->findDevice("UR-6-85-5-A_Left");
-        UR_right = rws_wc->findDevice("UR-6-85-5-A_Right");
+        UR_robot = rws_wc->findDevice("UR-6-85-5-A");
+
+        if (UR_robot == nullptr)
+            std::cerr << "Could not find UR!" << std::endl;
     }
 }
 

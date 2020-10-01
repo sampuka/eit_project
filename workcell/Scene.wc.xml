@@ -10,7 +10,7 @@
 	</Frame>
 
 	<Frame name="URReference" refframe="Table" type="Movable">
-	    <RPY>0 0 0</RPY> <Pos> 0.05 0 0.11</Pos>
+	    <RPY>0 0 0</RPY> <Pos> 0.3 0 0.11</Pos>
 	</Frame>
     <Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
 
@@ -22,7 +22,13 @@
 	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
 		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
 	</Frame>
-	
+
+
+
+
+
+
+<!--	
 	<Frame name="Bottle" refframe="Table"  type="Movable" daf="true" >
         <RPY> -90 0 90 </RPY> <Pos> 0 0.474 0.21 </Pos>
         <Drawable name="Bottle" refframe="Bottle">
@@ -48,7 +54,7 @@
             <Polytope file="parts/wall_long" />
         </Drawable>
     </Frame>	
-    
+  
     <Frame name="WallShort" refframe="Table"  type="Movable" daf="true" >
         <RPY> 90 0 0 </RPY> <Pos> 0.3 -0.325 0.175</Pos>
         <Drawable name="WallShort" refframe="WallShort">
@@ -72,7 +78,7 @@
     -->
 
 <!-- Cameras -->
-
+<!--
     <Frame name="Camera_Right" refframe="WORLD" type="Movable">
 	    <Pos>0 1.033 1.325</Pos>
 	    <RPY>0 0 -25</RPY>
@@ -90,7 +96,7 @@
 	    <RPY>0 0 -25</RPY>
 	    <Property name="Scanner25D" desc="[fovy,width,height]">50 640 480</Property>
     </Frame>
-
+-->
 <!-- Collision -->
 
     <CollisionSetup file="SceneCollisionSetup.prox.xml" /> 
