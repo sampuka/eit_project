@@ -2,3 +2,6 @@
 # CLion IDE
 .idea/
 cmake-build-*/
+*.user
+build/
+.cmake/
