@@ -1,13 +1,17 @@
 #include "EITPlugin.hpp"
 
 EITPlugin::EITPlugin():
+  //TODO: Make GUI thread and ur communication thread
+
     RobWorkStudioPlugin("EITPluginUI", QIcon(":/pa_icon.png"))
 {
     setupUi(this);
 
     // Connect UI components to member functions
     connect(ui_home_button, SIGNAL(pressed()), this, SLOT(home_button()));
+    connect(ui_reconnect_button, SIGNAL(pressed()), this, SLOT(reconnect_button()));
     //connect(_btn_im    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
+    paul = new rwhw::URRTDE ("10.42.0.100");
 }
 
 EITPlugin::~EITPlugin()
@@ -22,7 +26,7 @@ void EITPlugin::initialize()
 
     getRobWorkStudio()->stateChangedEvent().add(std::bind(&EITPlugin::stateChangedListener, this, std::placeholders::_1), this);
 
-    // Get path to project from environment
+    // Get path to projectf from environment
     char* projectpath = std::getenv("EITDIR");
 
     if (projectpath == NULL)
@@ -104,4 +108,51 @@ void EITPlugin::stateChangedListener(const rw::kinematics::State& state)
 void EITPlugin::home_button()
 {
     std::cout << "Home button pressed!" << std::endl;
+    rw::math::Q q(6, 0,-1.6,-1.6,0,0,0);
+
+    if (paul->isConnected()) {
+      if (thread_name.joinable()) {
+      thread_name.join();
+        }
+      thread_name = std::thread(&EITPlugin::move_ur, this, q);
+      //move_ur(q);
+      }
+
+}
+
+void EITPlugin::reconnect_button()
+{
+  std::cout << "Reconnect button pressed!" << std::endl;
+  if (thread_name.joinable()) {
+  thread_name.join();
+    }
+  thread_name = std::thread(&EITPlugin::reconnect_ur, this);
+}
+
+void EITPlugin::reconnect_ur()
+{
+  std::cout << "Paul reconnects..." << std::endl;
+  if (paul->isConnected()) {
+      std::cout << "Paul feels connected. Reset connection..." << std::endl;
+      delete paul;
+      paul = new rwhw::URRTDE ("10.42.0.100");
+    }
+  else {
+      std::cout << "Paul feels disconnected. Reconnects..." << std::endl;
+      paul->reconnect();
+    }
+  std::cout << "Connected!" << std::endl;
+}
+
+void EITPlugin::move_ur(rw::math::Q q)
+{
+  std::cout << "Paul moves..." << std::endl;
+  try {
+    paul->moveJ(q,0.1,0.1);
+  } catch (std::exception& e) {
+      std::cout << e.what() << std::endl;
+  }
+  std::cout << "...Paul finished moving." << std::endl;
+  //paul->stopRobot(); //TEST if it does not work remove
+
 }

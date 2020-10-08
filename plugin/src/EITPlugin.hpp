@@ -24,11 +24,18 @@
 // Qt
 #include "ui_EITPlugin.h"
 
+// RTDE
+#include <rwhw/universalrobots_rtde/URRTDE.hpp>
+
+#include <thread>
+#include <exception>
+
 class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 {
     Q_OBJECT
     Q_INTERFACES( rws::RobWorkStudioPlugin )
     Q_PLUGIN_METADATA(IID "dk.sdu.mip.Robwork.RobWorkStudioPlugin/0.1" FILE "plugin.json")
+    //QThread connectThread;
 
     public:
         EITPlugin();
@@ -42,6 +49,9 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void stateChangedListener(const rw::kinematics::State& state);
 
         void home_button();
+        void reconnect_button();
+        void reconnect_ur();
+        void move_ur(rw::math::Q q);
 
     private:
         // RobWork
@@ -54,6 +64,9 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
+
+        std::thread thread_name;
+        rwhw::URRTDE *paul;
 };
 
 #endif /*EITPLUGIN_HPP*/

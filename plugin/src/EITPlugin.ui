@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout">
-    <property name ="alignment">
-     <enum>Qt::AlignTop</enum>
-    </property>
     <item>
      <widget class="QLabel" name="ui_status_label">
       <property name="text">
@@ -35,6 +32,13 @@
       </property>
       <property name="checked">
        <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="ui_reconnect_button">
+      <property name="text">
+       <string>Reconnect</string>
       </property>
      </widget>
     </item>
