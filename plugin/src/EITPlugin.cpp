@@ -9,7 +9,11 @@ EITPlugin::EITPlugin():
 
     // Connect UI components to member functions
     connect(ui_home_button, SIGNAL(pressed()), this, SLOT(home_button()));
+
     connect(ui_reconnect_button, SIGNAL(pressed()), this, SLOT(reconnect_button()));
+
+    connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
+
     //connect(_btn_im    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
     paul = new rwhw::URRTDE ("10.42.0.100");
 }
@@ -155,4 +159,18 @@ void EITPlugin::move_ur(rw::math::Q q)
   std::cout << "...Paul finished moving." << std::endl;
   //paul->stopRobot(); //TEST if it does not work remove
 
+}
+
+void EITPlugin::sync_pressed(bool checkbox_state)
+{
+    if (checkbox_state)
+    {
+        // Checkbox checked
+        // Read real UR position
+        // Set twin ur position
+    }
+    else
+    {
+        // Checkbox unchecked
+    }
 }

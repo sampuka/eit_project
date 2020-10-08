@@ -52,6 +52,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void reconnect_button();
         void reconnect_ur();
         void move_ur(rw::math::Q q);
+        void sync_pressed(bool);
 
     private:
         // RobWork
