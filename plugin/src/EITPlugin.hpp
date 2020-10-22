@@ -50,8 +50,8 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
     private slots:
         void stateChangedListener(const rw::kinematics::State& state);
 
-        void button_connect();
-        void button_disconnect();
+        void button_connect_disconnect();
+        void button_freemode();
         void button_home();
         void sync_pressed(bool);
 
@@ -68,6 +68,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         const std::string ur_ip = "10.10.1.100";
         std::unique_ptr<rwhw::URRTDE> ur_connection = nullptr;
         std::thread connect_thread;
+        bool freemode = false;
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;

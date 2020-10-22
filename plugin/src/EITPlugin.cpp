@@ -8,8 +8,8 @@ EITPlugin::EITPlugin():
     setupUi(this);
 
     // Connect UI components to member functions
-    connect(ui_button_connect, SIGNAL(pressed()), this, SLOT(button_connect()));
-    connect(ui_button_disconnect, SIGNAL(pressed()), this, SLOT(button_disconnect()));
+    connect(ui_button_connect_disconnect, SIGNAL(pressed()), this, SLOT(button_connect_disconnect()));
+    connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
     connect(ui_home_button, SIGNAL(pressed()), this, SLOT(home_button()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
@@ -47,7 +47,7 @@ void EITPlugin::initialize()
         }
     }
 
-    ui_button_disconnect->setEnabled(false);
+    //ui_button_freemode->setEnabled(false);
 }
 
 void EITPlugin::open(rw::models::WorkCell* workcell)
@@ -107,7 +107,7 @@ void EITPlugin::stateChangedListener(const rw::kinematics::State& state)
     rws_state = state;
 }
 
-void EITPlugin::button_connect()
+void EITPlugin::button_connect_disconnect()
 {
     std::cout << "Connect button pressed!" << std::endl;
 
@@ -117,14 +117,25 @@ void EITPlugin::button_connect()
     connect_thread = std::thread(&EITPlugin::connect_ur, this);
 }
 
-void EITPlugin::button_disconnect()
+void EITPlugin::button_freemode()
 {
-    std::cout << "Disconnect button pressed!" << std::endl;
+    std::cout << "Freemode button pressed!" << std::endl;
 
-    ur_connection = nullptr;
-    ui_label_connection->setText("UR status: disconnected");
-    ui_button_connect->setEnabled(true);
-    ui_button_disconnect->setEnabled(false);
+    if ((ur_connection == nullptr) || (!ur_connection->isConnected()))
+    {
+        if (freemode)
+        {
+            freemode = false;
+            ur_connection->endTeachMode();
+            ui_label_connection->setText("UR status: connected");
+        }
+        else
+        {
+            freemode = true;
+            ur_connection->teachMode();
+            ui_label_connection->setText("UR status: connected (free mode)");
+        }
+    }
 }
 
 void EITPlugin::button_home()
@@ -163,12 +174,20 @@ void EITPlugin::connect_ur()
     {
         ur_connection = std::make_unique<rwhw::URRTDE>(ur_ip);
         ui_label_connection->setText("UR status: connected");
-        ui_button_connect->setEnabled(false);
-        ui_button_disconnect->setEnabled(true);
+        ui_button_connect_disconnect->setText("Disconnect");
+        ui_button_freemode->setEnabled(true);
     }
     else
     {
-        std::cout << "UR already connected!" << std::endl;
+        if (freemode)
+        {
+            freemode = false;
+            ur_connection->endTeachMode();
+        }
+        ur_connection = nullptr;
+        ui_label_connection->setText("UR status: disconnected");
+        ui_button_connect_disconnect->setText("Connect");
+        ui_button_freemode->setEnabled(false);
     }
 }
 

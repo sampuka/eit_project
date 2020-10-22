@@ -18,7 +18,7 @@
     <item>
      <widget class="QLabel" name="ui_label_connection">
       <property name="text">
-       <string>Status: disconnected</string>
+       <string>UR status: disconnected</string>
       </property>
       <property name="textFormat">
        <enum>Qt::RichText</enum>
@@ -26,16 +26,19 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="ui_button_connect">
+     <widget class="QPushButton" name="ui_button_connect_disconnect">
       <property name="text">
        <string>Connect</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="ui_button_disconnect">
+     <widget class="QPushButton" name="ui_button_freemode">
       <property name="text">
-       <string>Disconnect</string>
+       <string>Toggle freemode</string>
+      </property>
+      <property name="enabled">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
