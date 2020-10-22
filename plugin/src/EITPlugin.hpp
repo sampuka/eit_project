@@ -27,8 +27,10 @@
 // RTDE
 #include <rwhw/universalrobots_rtde/URRTDE.hpp>
 
-#include <thread>
+// Standard includes
 #include <exception>
+#include <memory>
+#include <thread>
 
 class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 {
@@ -48,26 +50,27 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
     private slots:
         void stateChangedListener(const rw::kinematics::State& state);
 
-        void home_button();
-        void reconnect_button();
-        void reconnect_ur();
-        void move_ur(rw::math::Q q);
+        void button_connect();
+        void button_disconnect();
+        void button_home();
         void sync_pressed(bool);
 
     private:
+        void connect_ur();
+        void move_ur(rw::math::Q q);
+
         // RobWork
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
         rw::models::Device::Ptr UR_robot;
 
         // UR Robot
-        std::string UR_IP = "1.2.3.4";
+        const std::string ur_ip = "10.10.1.100";
+        std::unique_ptr<rwhw::URRTDE> ur_connection = nullptr;
+        std::thread connect_thread;
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
-
-        std::thread thread_name;
-        rwhw::URRTDE *paul;
 };
 
 #endif /*EITPLUGIN_HPP*/

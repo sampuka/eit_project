@@ -16,7 +16,31 @@
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout">
     <item>
-     <widget class="QLabel" name="ui_status_label">
+     <widget class="QLabel" name="ui_label_connection">
+      <property name="text">
+       <string>Status: disconnected</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::RichText</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="ui_button_connect">
+      <property name="text">
+       <string>Connect</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="ui_button_disconnect">
+      <property name="text">
+       <string>Disconnect</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="ui_label_status">
       <property name="text">
        <string>Status: ok</string>
       </property>
@@ -36,13 +60,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="ui_reconnect_button">
-      <property name="text">
-       <string>Reconnect</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="ui_home_button">
       <property name="text">
        <string>Home</string>
@@ -50,9 +67,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="ui_go_button">
+     <widget class="QPushButton" name="ui_button_start">
       <property name="text">
-       <string>Go! ..bwah!</string>
+       <string>Start</string>
       </property>
      </widget>
     </item>
