@@ -158,6 +158,10 @@ void EITPlugin::sync_pressed(bool checkbox_state)
 {
     if (checkbox_state)
     {
+        if (ur_connection == nullptr || !ur_connection->isConnected())
+        {
+            ui_checkbox_sync->setChecked(false);
+        }
         // Checkbox checked
         // Read real UR position
         // Set twin ur position
@@ -176,6 +180,7 @@ void EITPlugin::connect_ur()
         ui_label_connection->setText("UR status: connected");
         ui_button_connect_disconnect->setText("Disconnect");
         ui_button_freemode->setEnabled(true);
+        ui_checkbox_sync->setEnabled(true);
     }
     else
     {
@@ -188,6 +193,7 @@ void EITPlugin::connect_ur()
         ui_label_connection->setText("UR status: disconnected");
         ui_button_connect_disconnect->setText("Connect");
         ui_button_freemode->setEnabled(false);
+        ui_checkbox_sync->setEnabled(false);
     }
 }
 
