@@ -73,7 +73,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="ui_home_button">
+     <widget class="QPushButton" name="ui_button_home">
       <property name="text">
        <string>Home</string>
       </property>

@@ -10,7 +10,7 @@ EITPlugin::EITPlugin():
     // Connect UI components to member functions
     connect(ui_button_connect_disconnect, SIGNAL(pressed()), this, SLOT(button_connect_disconnect()));
     connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
-    connect(ui_home_button, SIGNAL(pressed()), this, SLOT(home_button()));
+    connect(ui_button_home, SIGNAL(pressed()), this, SLOT(button_home()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
 
