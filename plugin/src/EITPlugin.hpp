@@ -53,11 +53,20 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void button_connect_disconnect();
         void button_freemode();
         void button_home();
+        void button_start();
         void sync_pressed(bool);
 
     private:
-        void connect_ur();
         void move_ur(rw::math::Q q);
+
+        bool should_shutdown = false; // Set to true -> threads stop
+
+        // Control loop
+        bool running = true; // Whether or not robot moves
+        void control_loop();
+        std::thread control_loop_thread;
+        std::vector<std::pair<unsigned int, rw::math::Q>> trajectory; // unsigned int is amount of milliseconds until next position
+        unsigned int trajectory_index = 0; // Which index of the trajectory are we on, or moving towards
 
         // RobWork
         rw::models::WorkCell::Ptr rws_wc;
@@ -67,6 +76,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         // UR Robot
         const std::string ur_ip = "10.10.1.100";
         std::unique_ptr<rwhw::URRTDE> ur_connection = nullptr;
+        void connect_ur();
         std::thread connect_thread;
         bool freemode = false;
 

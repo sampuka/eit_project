@@ -11,6 +11,7 @@ EITPlugin::EITPlugin():
     connect(ui_button_connect_disconnect, SIGNAL(pressed()), this, SLOT(button_connect_disconnect()));
     connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
     connect(ui_button_home, SIGNAL(pressed()), this, SLOT(button_home()));
+    connect(ui_button_start, SIGNAL(pressed()), this, SLOT(button_start()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
 
@@ -47,7 +48,7 @@ void EITPlugin::initialize()
         }
     }
 
-    //ui_button_freemode->setEnabled(false);
+    control_loop_thread = std::thread(&EITPlugin::control_loop, this);
 }
 
 void EITPlugin::open(rw::models::WorkCell* workcell)
@@ -154,6 +155,21 @@ void EITPlugin::button_home()
       */
 }
 
+void EITPlugin::button_start()
+{
+    std::cout << "Start button pressed!" << std::endl;
+
+    trajectory.clear();
+    trajectory_index = 0;
+
+    for (int i = 0; i < 100; i++)
+    {
+        trajectory.emplace_back(std::make_pair(30, rw::math::Q(6, 0.0+i*0.01, -1.0+i*0.01, -1.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01)));
+    }
+
+    running = true;
+}
+
 void EITPlugin::sync_pressed(bool checkbox_state)
 {
     if (checkbox_state)
@@ -169,6 +185,67 @@ void EITPlugin::sync_pressed(bool checkbox_state)
     else
     {
         // Checkbox unchecked
+    }
+}
+
+void EITPlugin::control_loop()
+{
+    std::chrono::time_point<std::chrono::high_resolution_clock> moved_ts; // Timestamp of last time we moved to new trajectory
+
+    while (!should_shutdown)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        if (ur_connection != nullptr && !ur_connection->isConnected())
+        {
+            ur_connection = nullptr;
+            freemode = false;
+            ui_label_connection->setText("UR status: disconnected");
+            ui_button_connect_disconnect->setText("Connect");
+            ui_checkbox_sync->setChecked(false);
+            ui_checkbox_sync->setEnabled(false);
+        }
+
+        if (running && !trajectory.empty())
+        {
+            if (ui_checkbox_sync->isChecked())
+            {
+                rw::math::Q curr_q = ur_connection->getActualQ();
+
+                UR_robot->setQ(curr_q, rws_state);
+                getRobWorkStudio()->setState(rws_state);
+            }
+            else
+            {
+                std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> since_moved = now-moved_ts;
+                //std::cout << '\n';
+                //std::cout /*<< moved_ts.count() << '\n' << now.count() << '\n'*/ << since_moved.count() << std::endl;
+
+                if (
+                        (trajectory_index == 0) ||
+                        (std::chrono::duration_cast<std::chrono::milliseconds>(since_moved).count() > trajectory.at(trajectory_index-1).first)
+                   )
+                {
+                    if (trajectory_index == trajectory.size())
+                    {
+                        running = false;
+                        continue;
+                    }
+
+                    UR_robot->setQ(trajectory.at(trajectory_index).second, rws_state);
+                    getRobWorkStudio()->setState(rws_state);
+
+                    trajectory_index++;
+
+                    moved_ts = std::chrono::high_resolution_clock::now();
+                }
+            }
+        }
+        else
+        {
+            moved_ts = std::chrono::high_resolution_clock::now();
+        }
     }
 }
 
