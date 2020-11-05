@@ -11,3 +11,4 @@ plugin/src/moc_EITPlugin.cpp_parameters
 plugin/src/resources.qrc.depends
 plugin/ui_EITPlugin.h
 build*/
+rwsettings.xml
