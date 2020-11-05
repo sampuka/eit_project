@@ -5,7 +5,8 @@
 	<Frame name="Table" refframe="WORLD" type="Fixed">
 	    <RPY>0 0 0</RPY> <Pos>0 0 -0.1</Pos>		
         <Drawable name="Table" refframe="Table">
-            <Polytope file="table/Sigmund_table" />
+            <RGB> 0.5 0.5 0.5 </RGB>
+            <Polytope file="table/CleanTable" />
         </Drawable>
 	</Frame>
 
@@ -15,16 +16,70 @@
     <Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
 
 	<Frame name="Gripper" refframe="UR-6-85-5-A.TCP" type="Movable">
-		<RPY>0 0 0</RPY> <Pos>0 0 0.072</Pos>
+		<RPY>90 0 0</RPY> <Pos>0 0 0.0001</Pos>
 	</Frame>
-    <Include file="wsg50/wsg50.xml" />
+    <Include file="DHPS/DHPS.wc.xml" />
 
 	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
 		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
 	</Frame>
 
+	<Frame name="finger_1" refframe="DHPS.RightFinger"  type="Movable">
+		<RPY> 0 0 0 </RPY> 
+    <Pos> 0 0.06 0.022</Pos>    
+        <Drawable name="finger_1" refframe="finger_1">
+            <RGB> 0 1 0 </RGB>
+            <Polytope file="parts/Festo_Gripper_v2" />
+        </Drawable>
+    </Frame>	
 
+	<Frame name="finger_2" refframe="DHPS.LeftFinger"  type="Movable">
+		<RPY> 0 180 0 </RPY> 
+    <Pos> 0 0.06 -0.022</Pos>    
+        <Drawable name="finger_2" refframe="finger_2">
+            <RGB> 0 1 0 </RGB>
+            <Polytope file="parts/Festo_Gripper_v2" />
+        </Drawable>
+    </Frame>	
 
+	<Frame name="Drop" refframe="WORLD"  type="Fixed">
+		<RPY> 180 0 0 </RPY> 
+    <Pos> 0.375 -0.5 0 </Pos>    
+        <Drawable name="Drop" refframe="Drop">
+            <RGB> 0 0 0.7 </RGB>
+            <Polytope file="parts/MagDropScaled" />
+        </Drawable>
+    </Frame>		
+
+	<Frame name="Wall" refframe="WORLD"  type="Fixed">
+		<RPY> 0 0 0 </RPY> <Pos> 0 0.4 0.075 </Pos>
+        <Drawable name="Wall" refframe="Wall">
+            <RGB> 1 0 0 1</RGB>
+            <Box x="0.8" y="0.05" z="0.15" />
+        </Drawable>
+    </Frame>	
+	<Frame name="Wall2" refframe="WORLD"  type="Fixed">
+		<RPY> 0 0 0 </RPY> <Pos> 0 0.55 0.075 </Pos>
+        <Drawable name="Wall2" refframe="Wall2">
+            <RGB> 1 0 0 1</RGB>
+            <Box x="0.8" y="0.05" z="0.15" />
+        </Drawable>
+    </Frame>		
+	<Frame name="rebar" refframe="WORLD"  type="Fixed">
+		<RPY> 0 0 90 </RPY> <Pos> 0.324 -0.5 0.01 </Pos>
+        <Drawable name="rebar" refframe="rebar">
+            <RGB> 1 0 0 1</RGB>
+            <Cylinder radius="0.005" z="0.2" />
+        </Drawable>
+    </Frame>	  	  
+
+<!--
+	<Frame name="Gantry" refframe="WORLD"  type="Fixed">
+		<RPY> 0 0 0 </RPY> <Pos> -5 -1 0 </Pos>
+        <Drawable name="Gantry" refframe="Gantry">
+            <Polytope file="parts/Scaled" />
+        </Drawable>
+    </Frame>		
 
 
 
@@ -61,6 +116,7 @@
             <Polytope file="parts/wall_short" />
         </Drawable>
     </Frame>
+
     <!--
 	<Frame name="Square" refframe="Table"  type="Movable" daf="true" >
         <RPY> -90 0 90 </RPY> <Pos> 0.25 0.474 0.150</Pos>
@@ -76,6 +132,8 @@
         </Drawable>
     </Frame>
     -->
+
+
 
 <!-- Cameras -->
 <!--
@@ -100,5 +158,7 @@
 <!-- Collision -->
 
     <CollisionSetup file="SceneCollisionSetup.prox.xml" /> 
+
+
 
 </WorkCell>
