@@ -11,6 +11,7 @@ EITPlugin::EITPlugin():
     connect(ui_button_connect_disconnect, SIGNAL(pressed()), this, SLOT(button_connect_disconnect()));
     connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
     connect(ui_button_home, SIGNAL(pressed()), this, SLOT(button_home()));
+    connect(ui_button_forcemode, SIGNAL(pressed()),this, SLOT(button_forcemode()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
 
@@ -141,17 +142,22 @@ void EITPlugin::button_freemode()
 void EITPlugin::button_home()
 {
     std::cout << "Home button pressed!" << std::endl;
-    /*
-    rw::math::Q q(6, 0,-1.6,-1.6,0,0,0);
 
-    if (paul->isConnected()) {
-      if (thread_name.joinable()) {
-      thread_name.join();
-        }
-      thread_name = std::thread(&EITPlugin::move_ur, this, q);
-      //move_ur(q);
-      }
-      */
+    rw::math::Q q(6, 0,-1.6,-1.6,0,0,0);
+    move_ur(q);
+}
+
+void EITPlugin::button_forcemode()
+{
+  std::cout << "Force mode button pressed!" << std::endl;
+  // How to handle force mode? No force mode in RWS. Position control sim and force control real
+  std::cout << "Sync: " << ui_checkbox_sync->checkState() << std::endl;
+  if (ui_checkbox_sync->checkState()) {
+      //Move simultaneously
+    }
+  else {
+      //Move only in sim
+    }
 }
 
 void EITPlugin::sync_pressed(bool checkbox_state)
@@ -199,12 +205,15 @@ void EITPlugin::connect_ur()
 
 void EITPlugin::move_ur(rw::math::Q q)
 {
-    std::cout << "Paul moves..." << std::endl;
-    try {
-        ur_connection->moveJ(q,0.1,0.1);
-    } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
-    }
-    std::cout << "...Paul finished moving." << std::endl;
-    //paul->stopRobot(); //TEST if it does not work remove
+    std::cout << "Trying to move to " << q << "..."<< std::endl;
+    if (ui_checkbox_sync->checkState()) {
+        //Move simultaneously
+      }
+    else {
+       //Only move in simulation
+       rw::math::Q from = UR_robot->getQ(rws_state);
+       rw::math::Q to = q;
+
+
+      }
 }

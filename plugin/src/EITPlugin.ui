@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout">
-    <property name="alignment">
-     <enum>Qt::AlignTop</enum>
-    </property>
     <item>
      <widget class="QLabel" name="ui_label_connection">
       <property name="text">
@@ -37,11 +34,11 @@
     </item>
     <item>
      <widget class="QPushButton" name="ui_button_freemode">
-      <property name="text">
-       <string>Toggle freemode</string>
-      </property>
       <property name="enabled">
        <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Toggle freemode</string>
       </property>
      </widget>
     </item>
@@ -64,13 +61,13 @@
     </item>
     <item>
      <widget class="QCheckBox" name="ui_checkbox_sync">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string>Sync with robot</string>
       </property>
       <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="enabled">
        <bool>false</bool>
       </property>
      </widget>
@@ -86,6 +83,13 @@
      <widget class="QPushButton" name="ui_button_start">
       <property name="text">
        <string>Start</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="ui_button_forcemode">
+      <property name="text">
+       <string>Force Mode</string>
       </property>
      </widget>
     </item>
