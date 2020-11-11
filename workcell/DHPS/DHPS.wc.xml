@@ -1,0 +1,55 @@
+<TreeDevice name="DHPS">
+  <Frame name="Base" type="Movable">
+    <RPY>0 0 90</RPY>
+	<Pos>0 0 0</Pos>
+  </Frame>
+
+ <!-- We create this as a virtual joint, only used to control the two dependent joints -->
+ 
+ <Joint name="RightFinger" type="Prismatic">
+  <!--<RPY> 0 0 90 </RPY> <Pos> 0 -0.0045 0.093 </Pos>-->
+  <RPY> 0 0 0 </RPY> <Pos> 0 0 0</Pos>
+ </Joint>
+ <Frame name="TCPRight" refframe="RightFinger" type="EndEffector">
+ </Frame>
+
+ <Joint name="LeftFinger" refframe="Base" type="Prismatic">
+  <!--<RPY> 0 0 90 </RPY> <Pos> 0 0.0045 0.093</Pos>-->
+  <RPY> 0 0 0 </RPY> <Pos> 0 0 0</Pos> 
+  <Depend on="RightFinger" gain="-1" offset="0" />
+ </Joint>
+ <Frame name="TCPLeft" refframe="LeftFinger" type="EndEffector">
+ </Frame>
+<!-- Define limits -->
+ <PosLimit refjoint="RightFinger" min="0" max="0.001" />
+ <VelLimit refjoint="RightFinger" max="0.06" />
+
+<!-- And now we add the geometry -->
+ <Drawable name="BaseGeo" refframe="Base">
+  <Polytope file="Geometry/DHPS_16_A_body" />
+</Drawable>
+
+ <Drawable name="LeftGeo" refframe="LeftFinger" colmodel="Disabled">
+  <RPY> 0 -180 0 </RPY> <Pos> 0 0.0475 0</Pos>
+  <Polytope file="Geometry/DHPS_16_A_left_finger" />
+</Drawable>
+
+ <Drawable name="RightGeo" refframe="RightFinger" colmodel="Disabled">
+  <RPY> 0 0 0 </RPY> <Pos> 0 0.0475 0</Pos>
+  <Polytope file="Geometry/DHPS_16_A_right_finger" />
+</Drawable>
+ 
+ 
+ <CollisionModel name="LeftGeo" refframe="LeftFinger" >
+  <RPY> 0 -180 0 </RPY> <Pos> 0 0.0475 0</Pos>
+  <Polytope file="Geometry/DHPS_16_A_left_finger" />
+</CollisionModel>
+
+ <CollisionModel name="RightGeo" refframe="RightFinger" >
+  <RPY> 0 0 0 </RPY> <Pos> 0 0.0475 0</Pos>
+  <Polytope file="Geometry/DHPS_16_A_right_finger" />
+</CollisionModel>
+
+ <CollisionSetup file="CollisionSetup.prox.xml" />
+ 
+</TreeDevice>
