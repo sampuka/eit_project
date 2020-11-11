@@ -53,7 +53,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void button_connect_disconnect();
         void button_freemode();
         void button_home();
-        void button_forcemode();
+        void apply_force(double force);
         void button_start();
         void sync_pressed(bool);
 

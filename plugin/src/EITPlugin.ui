@@ -86,13 +86,6 @@
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QPushButton" name="ui_button_forcemode">
-      <property name="text">
-       <string>Force Mode</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
  </widget>

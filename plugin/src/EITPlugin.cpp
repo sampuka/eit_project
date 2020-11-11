@@ -11,7 +11,6 @@ EITPlugin::EITPlugin():
     connect(ui_button_connect_disconnect, SIGNAL(pressed()), this, SLOT(button_connect_disconnect()));
     connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
     connect(ui_button_home, SIGNAL(pressed()), this, SLOT(button_home()));
-    connect(ui_button_forcemode, SIGNAL(pressed()),this, SLOT(button_forcemode()));
     connect(ui_button_start, SIGNAL(pressed()), this, SLOT(button_start()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
@@ -148,17 +147,42 @@ void EITPlugin::button_home()
     move_ur(q);
 }
 
-void EITPlugin::button_forcemode()
+void EITPlugin::apply_force(double force)
 {
-  std::cout << "Force mode button pressed!" << std::endl;
-  // How to handle force mode? No force mode in RWS. Position control sim and force control real
-  std::cout << "Sync: " << ui_checkbox_sync->checkState() << std::endl;
-  if (ui_checkbox_sync->checkState()) {
-      //Move simultaneously
-    }
-  else {
-      //Move only in sim
-    }
+  //TODO: Should only be in force mode while placing! How can we do that?
+
+  std::cout << "Applying force!" << std::endl;
+  // Force mode on real robot, nothing in RWS.
+
+  //SETUP force mode
+  //Force frame relative to base frame
+  rw::math::Transform3D feature = UR_robot->getEnd()->getTransform(rws_state);
+  //Compliant in Z-axis, selection vector (X,Y,Z,R,P,Y)
+  rw::math::Q selection_vec(6, 0,0,1,0,0,0);
+  //Apply force in compliant direction
+  rw::math::Wrench6D wrench(0.0,0.0,force,0.0,0.0,0.0);
+  //Specify type - 1: Point, 2: Simple, 3: Motion
+  int type = 2;
+  //Specify limits in speed for compliant directions and a certain allowed deviation for noncompliant
+  rw::math::Q limits(0.1, 0.1, 0.15, 0.17, 0.17, 0.17);
+
+  //Specify for how long robot should apply force
+  std::chrono::milliseconds duration = std::chrono::milliseconds(500);
+
+  if (ur_connection != nullptr && ur_connection->isConnected())
+  {
+      ur_connection->forceMode(feature, selection_vec, wrench, type, limits);
+      std::this_thread::sleep_for(duration);
+      /*
+      std::chrono::time_point<std::chrono::high_resolution_clock> finished = std::chrono::high_resolution_clock::now() + duration;
+
+      while (std::chrono::system_clock::now() < finished) {
+          ur_connection->forceMode(feature, selection_vec, wrench, type, limits);
+      }
+      */
+      ur_connection->forceModeStop();
+  }
+
 }
 
 void EITPlugin::button_start()
@@ -284,13 +308,8 @@ void EITPlugin::move_ur(rw::math::Q q)
 {
     std::cout << "Trying to move to " << q << "..."<< std::endl;
     if (ui_checkbox_sync->checkState()) {
-        //Move simultaneously
-      }
-    else {
-       //Only move in simulation
-       rw::math::Q from = UR_robot->getQ(rws_state);
-       rw::math::Q to = q;
-
-
+        //TODO: As Mathias, make trajectory between two configs and move.
+        rw::math::Q from = UR_robot->getQ(rws_state);
+        rw::math::Q to = q;
       }
 }
