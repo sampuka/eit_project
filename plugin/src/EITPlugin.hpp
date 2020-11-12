@@ -7,14 +7,22 @@
 #include <rw/loaders/ImageLoader.hpp>
 #include <rw/loaders/WorkCellFactory.hpp>
 #include <rw/models/WorkCell.hpp>
+
+// Trajectory planning
 #include <rw/trajectory/LinearInterpolator.hpp>
+#include <rw/pathplanning/PlannerConstraint.hpp>
+#include <rw/pathplanning/QToQPlanner.hpp>
+#include <rw/proximity/CollisionDetector.hpp>
+#include <rw/proximity/CollisionStrategy.hpp>
+#include <rw/proximity/ProximityData.hpp>
+#include <rw/trajectory/Path.hpp>
+#include <rwlibs/pathplanners/rrt/RRTPlanner.hpp>
+#include <rwlibs/proximitystrategies/ProximityStrategyFactory.hpp>
+#include <rwlibs/pathplanners/rrt/RRTQToQPlanner.hpp>
 
 #include <rwlibs/opengl/RenderImage.hpp>
 #include <rwlibs/simulation/GLFrameGrabber.hpp>
 #include <rwlibs/simulation/GLFrameGrabber25D.hpp>
-#include <rwlibs/pathplanners/rrt/RRTPlanner.hpp>
-#include <rwlibs/pathplanners/rrt/RRTQToQPlanner.hpp>
-#include <rwlibs/proximitystrategies/ProximityStrategyFactory.hpp>
 
 // RobWorkStudio includes
 #include <rws/RobWorkStudio.hpp>
@@ -23,6 +31,7 @@
 
 // Qt
 #include "ui_EITPlugin.h"
+
 
 // RTDE
 #include <rwhw/universalrobots_rtde/URRTDE.hpp>
@@ -56,6 +65,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void apply_force(double force);
         void button_start();
         void sync_pressed(bool);
+        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend);
 
     private:
         void move_ur(rw::math::Q q);
