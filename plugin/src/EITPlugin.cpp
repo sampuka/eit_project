@@ -232,10 +232,17 @@ void EITPlugin::button_start()
     trajectory.clear();
     trajectory_index = 0;
 
-    for (int i = 0; i < 100; i++)
+    rw::math::Q from(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
+    rw::math::Q to(6, 0.0,-1.6,-1.6,0.0,0.0,0.0);
+
+    rw::math::Math::seed();
+    double extend = 0.05;
+    running = false;
+    create_trajectory(from, to, extend);
+    /*for (int i = 0; i < 100; i++)
     {
         trajectory.emplace_back(std::make_pair(30, rw::math::Q(6, 0.0+i*0.01, -1.0+i*0.01, -1.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01)));
-    }
+    }*/
 
     running = true;
 }
@@ -382,4 +389,51 @@ rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
     }
 
     return best_Q;
+}
+
+void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend)
+{
+  /*
+   * TODO: Make path planning, from home to pick-up, open gripper and move down, close gripper, back to pick-up,
+   * pick-up to approach point, linear down to place, open gripper, move up to approach point, close girpper, back to home
+   *
+   * How to sync with real robot?
+   * Nice-to-have: apply force
+   *
+   * NOTE: I do not clear in this one
+   * */
+      UR_robot->setQ(from,rws_state);
+      getRobWorkStudio()->setState(rws_state);
+      rw::proximity::CollisionDetector detector(rws_wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
+      rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector, UR_robot, rws_state);
+      rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(UR_robot),constraint.getQConstraintPtr());
+      rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
+      rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, extend, rwlibs::pathplanners::RRTPlanner::RRTConnect);
+
+       rw::proximity::CollisionDetector::QueryResult data;
+       UR_robot->setQ(from, rws_state);
+
+       if (detector.inCollision(rws_state, &data))
+           RW_THROW("Initial configuration in collision! can not plan a path.");
+       UR_robot->setQ (to, rws_state);
+       if (detector.inCollision(rws_state, &data))
+           RW_THROW("Final configuration in collision! can not plan a path.");
+
+      //trajectory.clear();
+      //trajectory_index = 0;
+
+      rw::trajectory::QPath result;
+      if (planner->query(from,to,result))
+      {
+           std::cout << "Planned path successfully." << std::endl;
+      }
+
+      const int duration = 10;
+      rw::trajectory::LinearInterpolator<rw::math::Q> linInt(from, to, duration);
+      rw::trajectory::QPath tempQ;
+
+      for(int i = 0; i < duration+1; i++)
+      {
+          trajectory.emplace_back(std::make_pair(30,linInt.x(i)));
+      }
 }
