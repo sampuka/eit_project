@@ -75,11 +75,51 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             getRobWorkStudio()->getWorkCellScene()->addRender("BackgroundImage",_bgRender,bgFrame);
         }
 
-        UR_robot = rws_wc->findDevice("UR-6-85-5-A");
+        UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
+        base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR-6-85-5-A.BaseMov");
 
         if (UR_robot == nullptr)
             std::cerr << "Could not find UR!" << std::endl;
+
+        if (base_frame == nullptr)
+            std::cerr << "Could not find base frame!" << std::endl;
     }
+
+    // Find place Qs
+    place_approach_Qs.clear();
+    place_Qs.clear();
+
+    rw::math::Q homeQ = UR_robot->getQ(rws_state);
+    rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
+
+    for (unsigned int i = 0; i < place_position_count; i++)
+    {
+        rw::math::Transform3D<> approach_T(
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.465, 0.268),
+                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+
+        std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
+
+        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+
+        place_approach_Qs.push_back(nearQ);
+    }
+
+    for (unsigned int i = 0; i < place_position_count; i++)
+    {
+        rw::math::Transform3D<> place_T(
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.465, 0.238),
+                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+
+        std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
+
+        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+
+        place_Qs.push_back(nearQ);
+    }
+
+    UR_robot->setQ(place_approach_Qs.at(1), rws_state);
+    getRobWorkStudio()->setState(rws_state);
 }
 
 void EITPlugin::close()
@@ -312,4 +352,34 @@ void EITPlugin::move_ur(rw::math::Q q)
         rw::math::Q from = UR_robot->getQ(rws_state);
         rw::math::Q to = q;
       }
+}
+
+double EITPlugin::Q_dist(rw::math::Q q1, rw::math::Q q2)
+{
+    return (q2-q1).norm2();
+}
+
+std::vector<rw::math::Q> EITPlugin::inverseKinematics(rw::math::Transform3D<> targetT)
+{
+    rw::invkin::ClosedFormIKSolverUR::Ptr closedFormSolver = rw::common::ownedPtr( new rw::invkin::ClosedFormIKSolverUR(UR_robot, rws_state));
+
+    return closedFormSolver->solve(targetT, rws_state);
+}
+
+rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
+{
+    rw::math::Q best_Q;
+    double best_Q_dist = 99999999;
+
+    for (const auto& Q : Qs)
+    {
+        double dist = Q_dist(nearQ, Q);
+        if (dist < best_Q_dist)
+        {
+            best_Q_dist = dist;
+            best_Q = Q;
+        }
+    }
+
+    return best_Q;
 }

@@ -69,10 +69,18 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         std::vector<std::pair<unsigned int, rw::math::Q>> trajectory; // unsigned int is amount of milliseconds until next position
         unsigned int trajectory_index = 0; // Which index of the trajectory are we on, or moving towards
 
+        // Planning
+        const unsigned int place_position_count = 2; // Must be at least 2 for now
+        const double x_lim1 = 0.35;
+        const double x_lim2 = -0.35;
+        std::vector<rw::math::Q> place_approach_Qs;
+        std::vector<rw::math::Q> place_Qs;
+
         // RobWork
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
-        rw::models::Device::Ptr UR_robot;
+        rw::models::SerialDevice::Ptr UR_robot;
+        rw::kinematics::Frame::Ptr base_frame;
 
         // UR Robot
         const std::string ur_ip = "10.10.1.100";
@@ -80,6 +88,11 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void connect_ur();
         std::thread connect_thread;
         bool freemode = false;
+
+        // Utility
+        double Q_dist(rw::math::Q q1, rw::math::Q q2);
+        std::vector<rw::math::Q> inverseKinematics(rw::math::Transform3D<> targetT);
+        rw::math::Q nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ);
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
