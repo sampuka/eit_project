@@ -231,8 +231,22 @@ void EITPlugin::button_start()
 
     trajectory.clear();
     trajectory_index = 0;
+    rw::math::Q from;
 
-    rw::math::Q from(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
+    if (ui_checkbox_sync->isChecked())
+    {
+        std::cout << "Connected to real UR! setting simulation..." << std::endl;
+        from = ur_connection->getActualQ();
+
+        UR_robot->setQ(from, rws_state);
+        getRobWorkStudio()->setState(rws_state);
+
+      }
+    else
+    {
+        from = rw::math::Q(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
+    }
+    std::cout << "from: " << from << std::endl;
     rw::math::Q to(6, 0.0,-1.6,-1.6,0.0,0.0,0.0);
 
     rw::math::Math::seed();
@@ -243,6 +257,7 @@ void EITPlugin::button_start()
     {
         trajectory.emplace_back(std::make_pair(30, rw::math::Q(6, 0.0+i*0.01, -1.0+i*0.01, -1.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01)));
     }*/
+
 
     running = true;
 }
@@ -256,12 +271,23 @@ void EITPlugin::sync_pressed(bool checkbox_state)
             ui_checkbox_sync->setChecked(false);
         }
         // Checkbox checked
+        //ui_checkbox_sync->setChecked(true);
         // Read real UR position
+
+        rw::math::Q curr_q = ur_connection->getActualQ();
+        //std::cout << "Current real position: " << curr_q << std::endl;
         // Set twin ur position
+        UR_robot->setQ(curr_q, rws_state);
+        rw::math::Q sim_q = UR_robot->getQ(rws_state);
+        //std::cout << "Sim Q: " << sim_q << std::endl;
+        getRobWorkStudio()->setState(rws_state);
+        sim_q = UR_robot->getQ(rws_state);
+        //std::cout << "Sim Q next state: " << sim_q << std::endl;
     }
     else
     {
         // Checkbox unchecked
+        //ui_checkbox_sync->setChecked(false);
     }
 }
 
@@ -283,22 +309,40 @@ void EITPlugin::control_loop()
             ui_checkbox_sync->setEnabled(false);
         }
 
-        if (running && !trajectory.empty())
+        if (running && trash != nullptr)
         {
+            std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> since_moved = now-moved_ts;
+
+            if(since_moved.count() >= trash->endTime()){
+                running = false;
+                continue;
+            }
+
+
             if (ui_checkbox_sync->isChecked())
             {
+
                 rw::math::Q curr_q = ur_connection->getActualQ();
 
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
+
+                ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
+
+                log().info() << trash->x(since_moved.count()) << std::endl;
+
+
+
             }
             else
             {
-                std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> since_moved = now-moved_ts;
-                //std::cout << '\n';
-                //std::cout /*<< moved_ts.count() << '\n' << now.count() << '\n'*/ << since_moved.count() << std::endl;
 
+                UR_robot->setQ(trash->x(since_moved.count()), rws_state);
+                getRobWorkStudio()->setState(rws_state);
+
+
+                /*
                 if (
                         (trajectory_index == 0) ||
                         (std::chrono::duration_cast<std::chrono::milliseconds>(since_moved).count() > trajectory.at(trajectory_index-1).first)
@@ -312,11 +356,13 @@ void EITPlugin::control_loop()
 
                     UR_robot->setQ(trajectory.at(trajectory_index).second, rws_state);
                     getRobWorkStudio()->setState(rws_state);
+                    //std::cout << trajectory.at(trajectory_index).first << std::endl;
 
                     trajectory_index++;
 
                     moved_ts = std::chrono::high_resolution_clock::now();
-                }
+
+              }*/
             }
         }
         else
@@ -355,7 +401,6 @@ void EITPlugin::move_ur(rw::math::Q q)
 {
     std::cout << "Trying to move to " << q << "..."<< std::endl;
     if (ui_checkbox_sync->checkState()) {
-        //TODO: As Mathias, make trajectory between two configs and move.
         rw::math::Q from = UR_robot->getQ(rws_state);
         rw::math::Q to = q;
       }
@@ -428,12 +473,21 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
            std::cout << "Planned path successfully." << std::endl;
       }
 
-      const int duration = 10;
-      rw::trajectory::LinearInterpolator<rw::math::Q> linInt(from, to, duration);
+
+      const int duration = 30;
+      trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
+      for (unsigned int i = 1; i < result.size(); i++) {
+          rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], duration));
+          //linInt(result[i-1], result[i], duration);
+          trash->add(traj);
+        }
+
+
+      /*rw::trajectory::LinearInterpolator<rw::math::Q> linInt(from, to, duration);
       rw::trajectory::QPath tempQ;
 
       for(int i = 0; i < duration+1; i++)
       {
           trajectory.emplace_back(std::make_pair(30,linInt.x(i)));
-      }
+      }*/
 }
