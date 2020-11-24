@@ -34,7 +34,11 @@
 
 
 // RTDE
-#include <rwhw/universalrobots_rtde/URRTDE.hpp>
+//#include <rwhw/universalrobots_rtde/URRTDE.hpp>
+
+#include <ur_rtde/rtde_control_interface.h>
+#include <ur_rtde/rtde_receive_interface.h>
+#include <ur_rtde/rtde_io_interface.h>
 
 // Standard includes
 #include <exception>
@@ -96,11 +100,19 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 
         // UR Robot
         const std::string ur_ip = "10.10.1.100";
-        std::unique_ptr<rwhw::URRTDE> ur_connection = nullptr;
-        void connect_ur();
+        // std::unique_ptr<rwhw::URRTDE> ur_connection = nullptr;
+        std::unique_ptr<ur_rtde::RTDEControlInterface> ur_control = nullptr;
+        std::unique_ptr<ur_rtde::RTDEReceiveInterface> ur_receive = nullptr;
+        std::unique_ptr<ur_rtde::RTDEIOInterface> ur_IO = nullptr;
+        
+        void toggle_ur_connection();
         std::thread connect_thread;
         bool freemode = false;
-
+        
+        void ur_connect();
+        void ur_disconnect();
+        bool ur_isConnected();
+        
         // Utility
         double Q_dist(rw::math::Q q1, rw::math::Q q2);
         std::vector<rw::math::Q> inverseKinematics(rw::math::Transform3D<> targetT);

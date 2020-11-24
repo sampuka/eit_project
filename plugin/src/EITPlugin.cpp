@@ -155,25 +155,25 @@ void EITPlugin::button_connect_disconnect()
     if (connect_thread.joinable()) {
         connect_thread.join();
     }
-    connect_thread = std::thread(&EITPlugin::connect_ur, this);
+    connect_thread = std::thread(&EITPlugin::toggle_ur_connection, this);
 }
 
 void EITPlugin::button_freemode()
 {
     std::cout << "Freemode button pressed!" << std::endl;
 
-    if ((ur_connection == nullptr) || (!ur_connection->isConnected()))
+    if (ur_isConnected())
     {
         if (freemode)
         {
             freemode = false;
-            ur_connection->endTeachMode();
+            ur_control->endTeachMode();
             ui_label_connection->setText("UR status: connected");
         }
         else
         {
             freemode = true;
-            ur_connection->teachMode();
+            ur_control->teachMode();
             ui_label_connection->setText("UR status: connected (free mode)");
         }
     }
@@ -198,29 +198,29 @@ void EITPlugin::apply_force(double force)
   //Force frame relative to base frame
   rw::math::Transform3D feature = UR_robot->getEnd()->getTransform(rws_state);
   //Compliant in Z-axis, selection vector (X,Y,Z,R,P,Y)
-  rw::math::Q selection_vec(6, 0,0,1,0,0,0);
+  std::vector<int> selection_vec({6,0,0,1,0,0,0});
   //Apply force in compliant direction
-  rw::math::Wrench6D wrench(0.0,0.0,force,0.0,0.0,0.0);
+  std::vector<double> wrench({0.0,0.0,force,0.0,0.0,0.0});
   //Specify type - 1: Point, 2: Simple, 3: Motion
   int type = 2;
   //Specify limits in speed for compliant directions and a certain allowed deviation for noncompliant
-  rw::math::Q limits(0.1, 0.1, 0.15, 0.17, 0.17, 0.17);
+    std::vector<double>  limits({0.1, 0.1, 0.15, 0.17, 0.17, 0.17});
+
+  rw::math::RPY<double> rpy(feature.R());
+  std::vector<double> f(6);
+    for (int i = 0; i < 3; ++i) {
+        f[i] = feature.P()[i];
+        f[i+3] = rpy[i];
+    }
 
   //Specify for how long robot should apply force
   std::chrono::milliseconds duration = std::chrono::milliseconds(500);
 
-  if (ur_connection != nullptr && ur_connection->isConnected())
+  if (ur_isConnected())
   {
-      ur_connection->forceMode(feature, selection_vec, wrench, type, limits);
+      ur_control->forceMode(f, selection_vec, wrench, type, limits);
       std::this_thread::sleep_for(duration);
-      /*
-      std::chrono::time_point<std::chrono::high_resolution_clock> finished = std::chrono::high_resolution_clock::now() + duration;
-
-      while (std::chrono::system_clock::now() < finished) {
-          ur_connection->forceMode(feature, selection_vec, wrench, type, limits);
-      }
-      */
-      ur_connection->forceModeStop();
+      ur_control->forceModeStop();
   }
 
 }
@@ -236,7 +236,7 @@ void EITPlugin::button_start()
     if (ui_checkbox_sync->isChecked())
     {
         std::cout << "Connected to real UR! setting simulation..." << std::endl;
-        from = ur_connection->getActualQ();
+        from = ur_receive->getActualQ();
 
         UR_robot->setQ(from, rws_state);
         getRobWorkStudio()->setState(rws_state);
@@ -262,19 +262,17 @@ void EITPlugin::button_start()
     running = true;
 }
 
-void EITPlugin::sync_pressed(bool checkbox_state)
-{
-    if (checkbox_state)
-    {
-        if (ur_connection == nullptr || !ur_connection->isConnected())
-        {
+void EITPlugin::sync_pressed(bool checkbox_state) {
+    if (checkbox_state) {
+        if (!ur_isConnected()) {
             ui_checkbox_sync->setChecked(false);
+            return;
         }
         // Checkbox checked
         //ui_checkbox_sync->setChecked(true);
         // Read real UR position
 
-        rw::math::Q curr_q = ur_connection->getActualQ();
+        rw::math::Q curr_q = ur_receive->getActualQ();
         //std::cout << "Current real position: " << curr_q << std::endl;
         // Set twin ur position
         UR_robot->setQ(curr_q, rws_state);
@@ -283,11 +281,6 @@ void EITPlugin::sync_pressed(bool checkbox_state)
         getRobWorkStudio()->setState(rws_state);
         sim_q = UR_robot->getQ(rws_state);
         //std::cout << "Sim Q next state: " << sim_q << std::endl;
-    }
-    else
-    {
-        // Checkbox unchecked
-        //ui_checkbox_sync->setChecked(false);
     }
 }
 
@@ -299,14 +292,9 @@ void EITPlugin::control_loop()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        if (ur_connection != nullptr && !ur_connection->isConnected())
+        if (!ur_isConnected())
         {
-            ur_connection = nullptr;
-            freemode = false;
-            ui_label_connection->setText("UR status: disconnected");
-            ui_button_connect_disconnect->setText("Connect");
-            ui_checkbox_sync->setChecked(false);
-            ui_checkbox_sync->setEnabled(false);
+            ur_disconnect();
         }
 
         if (running && trash != nullptr)
@@ -318,51 +306,25 @@ void EITPlugin::control_loop()
                 running = false;
                 continue;
             }
-
-
             if (ui_checkbox_sync->isChecked())
             {
-
-                rw::math::Q curr_q = ur_connection->getActualQ();
+                rw::math::Q curr_q(ur_receive->getActualQ());
 
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
 
-                ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
+                //ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
 
                 log().info() << trash->x(since_moved.count()) << std::endl;
 
-
-
+                if (!ur_control->isProgramRunning()){
+                   //initialize movement
+                }
             }
             else
             {
-
                 UR_robot->setQ(trash->x(since_moved.count()), rws_state);
                 getRobWorkStudio()->setState(rws_state);
-
-
-                /*
-                if (
-                        (trajectory_index == 0) ||
-                        (std::chrono::duration_cast<std::chrono::milliseconds>(since_moved).count() > trajectory.at(trajectory_index-1).first)
-                   )
-                {
-                    if (trajectory_index == trajectory.size())
-                    {
-                        running = false;
-                        continue;
-                    }
-
-                    UR_robot->setQ(trajectory.at(trajectory_index).second, rws_state);
-                    getRobWorkStudio()->setState(rws_state);
-                    //std::cout << trajectory.at(trajectory_index).first << std::endl;
-
-                    trajectory_index++;
-
-                    moved_ts = std::chrono::high_resolution_clock::now();
-
-              }*/
             }
         }
         else
@@ -372,30 +334,44 @@ void EITPlugin::control_loop()
     }
 }
 
-void EITPlugin::connect_ur()
+void EITPlugin::toggle_ur_connection()
 {
-    if ((ur_connection == nullptr) || (!ur_connection->isConnected()))
-    {
-        ur_connection = std::make_unique<rwhw::URRTDE>(ur_ip);
-        ui_label_connection->setText("UR status: connected");
-        ui_button_connect_disconnect->setText("Disconnect");
-        ui_button_freemode->setEnabled(true);
-        ui_checkbox_sync->setEnabled(true);
-    }
-    else
-    {
-        if (freemode)
-        {
-            freemode = false;
-            ur_connection->endTeachMode();
-        }
-        ur_connection = nullptr;
-        ui_label_connection->setText("UR status: disconnected");
-        ui_button_connect_disconnect->setText("Connect");
-        ui_button_freemode->setEnabled(false);
-        ui_checkbox_sync->setEnabled(false);
-    }
+    if ( ur_isConnected() ) ur_disconnect();
+    else ur_connect();
 }
+
+void EITPlugin::ur_connect() {
+    ur_control = std::make_unique<ur_rtde::RTDEControlInterface>(ur_ip);
+    ur_receive = std::make_unique<ur_rtde::RTDEReceiveInterface>(ur_ip);
+    ur_IO = std::make_unique<ur_rtde::RTDEIOInterface>(ur_ip);
+
+    ui_label_connection->setText("UR status: connected");
+    ui_button_connect_disconnect->setText("Disconnect");
+    ui_button_freemode->setEnabled(true);
+    ui_checkbox_sync->setEnabled(true);
+}
+
+void EITPlugin::ur_disconnect() {
+    if (freemode)
+    {
+        freemode = false;
+        ur_control->endTeachMode();
+    }
+    ur_control = nullptr;
+    ur_receive = nullptr;
+    ur_IO = nullptr;
+
+    ui_label_connection->setText("UR status: disconnected");
+    ui_button_connect_disconnect->setText("Connect");
+    ui_button_freemode->setEnabled(false);
+    ui_checkbox_sync->setEnabled(false);
+}
+
+bool EITPlugin::ur_isConnected(){
+    return !((ur_control == nullptr) || (!ur_control->isConnected()) ||
+           (ur_receive == nullptr) || (!ur_receive->isConnected()) ||
+           (ur_IO == nullptr));
+};
 
 void EITPlugin::move_ur(rw::math::Q q)
 {
@@ -491,3 +467,5 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
           trajectory.emplace_back(std::make_pair(30,linInt.x(i)));
       }*/
 }
+
+
