@@ -265,10 +265,11 @@ void EITPlugin::button_start()
         UR_robot->setQ(from, rws_state);
         getRobWorkStudio()->setState(rws_state);
 
-      }
+    }
     else
     {
-        from = rw::math::Q(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
+        from = UR_robot->getQ(rws_state);
+        //rw::math::Q(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
     }
     std::cout << "from: " << from << std::endl;
     rw::math::Q to(6, 0.0,-1.6,-1.6,0.0,0.0,0.0);
@@ -316,10 +317,10 @@ void EITPlugin::control_loop()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        if (!ur_isConnected())
+        /*if (!ur_isConnected())
         {
             ur_disconnect();
-        }
+        }*/
 
         if (running && trash != nullptr)
         {
@@ -337,12 +338,15 @@ void EITPlugin::control_loop()
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
 
+
                 //ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
 
                 log().info() << trash->x(since_moved.count()) << std::endl;
 
-                if (!ur_control->isProgramRunning()){
-                   //initialize movement
+                if (!path.empty()){
+                   std::cout << "HERE" << std::endl;
+                   ur_control->moveJ(path);
+                   path.clear();
                 }
             }
             else
@@ -473,6 +477,15 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
            std::cout << "Planned path successfully." << std::endl;
       }
 
+
+      path.clear();
+      for(auto q: result){
+        std::vector<double> p = q.toStdVector();
+        p.push_back(0.5);
+        p.push_back(0.5);
+        p.push_back(0.025);
+        path.push_back(p);
+      }
 
       const int duration = 30;
       trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
