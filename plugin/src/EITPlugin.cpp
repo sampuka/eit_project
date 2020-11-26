@@ -206,9 +206,21 @@ void EITPlugin::button_freemode()
 void EITPlugin::button_home()
 {
     std::cout << "Home button pressed!" << std::endl;
+    rw::math::Q from;
+    rw::math::Q to = home_Q;
+    double extend = 0.05;
+    running = false;
 
-    rw::math::Q q(6, 0,-1.6,-1.6,0,0,0);
-    move_ur(q);
+    if(ui_checkbox_sync->isChecked()) {
+        from = ur_receive->getActualQ();
+        UR_robot->setQ(from, rws_state);
+        getRobWorkStudio()->setState(rws_state);
+      }
+    else {
+        from = UR_robot->getQ(rws_state);
+      }
+    create_trajectory(from, to, extend);
+    running = true;
 }
 
 void EITPlugin::apply_force(double force)
@@ -272,7 +284,7 @@ void EITPlugin::button_start()
         //rw::math::Q(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
     }
     std::cout << "from: " << from << std::endl;
-    rw::math::Q to(6, 0.0,-1.6,-1.6,0.0,0.0,0.0);
+    rw::math::Q to = pick_approach_Q;
 
     rw::math::Math::seed();
     double extend = 0.05;
@@ -438,15 +450,6 @@ bool EITPlugin::ur_isConnected(){
            (ur_IO == nullptr));
 };
 
-void EITPlugin::move_ur(rw::math::Q q)
-{
-    std::cout << "Trying to move to " << q << "..."<< std::endl;
-    if (ui_checkbox_sync->checkState()) {
-        rw::math::Q from = UR_robot->getQ(rws_state);
-        rw::math::Q to = q;
-      }
-}
-
 double EITPlugin::Q_dist(rw::math::Q q1, rw::math::Q q2)
 {
     return (q2-q1).norm2();
@@ -528,8 +531,15 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       const int duration = 30;
       trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
       for (unsigned int i = 1; i < result.size(); i++) {
-          rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], duration));
-          //linInt(result[i-1], result[i], duration);
+          rw::math::Q dQ = result[i-1] - result[i];
+          double max_dq = 0;
+          for (int i = 0; i < 6; i++)
+              max_dq = (max_dq > dQ[i])? max_dq: dQ[i];
+
+          int dt = (int)(2.0 * max_dq);
+
+          rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
+
           trash->add(traj);
         }
 
