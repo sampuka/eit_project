@@ -45,6 +45,18 @@
 #include <memory>
 #include <thread>
 
+struct SubPath
+{
+    SubPath(std::vector<std::vector<double>> _path, rw::trajectory::InterpolatorTrajectory<rw::math::Q> _traj, bool _grip)
+        : path(_path), traj(_traj), grip(_grip)
+    {}
+    SubPath() = delete;
+
+    const std::vector<std::vector<double>> path;
+    const rw::trajectory::InterpolatorTrajectory<rw::math::Q> traj;
+    const bool grip;
+};
+
 class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 {
     Q_OBJECT
@@ -84,6 +96,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         unsigned int trajectory_index = 0; // Which index of the trajectory are we on, or moving towards
         rw::trajectory::InterpolatorTrajectory<rw::math::Q>::Ptr trash;
         std::vector<std::vector<double>> path;
+        std::vector<SubPath> whole_path;
 
 
         // Planning

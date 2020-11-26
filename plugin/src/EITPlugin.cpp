@@ -102,7 +102,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     // Find pick approach Q
     {
         rw::math::Transform3D<> pick_T(
-                rw::math::Vector3D<>(0.320, -0.500, 0.103),
+                rw::math::Vector3D<>(0.320, -0.500, 0.115),
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
@@ -142,7 +142,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         place_Qs.push_back(nearQ);
     }
 
-    //UR_robot->setQ(pick_Q, rws_state);
+    //UR_robot->setQ(place_approach_Qs[0], rws_state);
     //getRobWorkStudio()->setState(rws_state);
 }
 
@@ -277,12 +277,49 @@ void EITPlugin::button_start()
     rw::math::Math::seed();
     double extend = 0.05;
     running = false;
-    create_trajectory(from, to, extend);
+    path.clear();
+    whole_path.clear();
+
+    create_trajectory(from, home_Q, extend);
+    whole_path.emplace_back(path, *trash, false);
+
+    for (unsigned int i = 0; i < 1; i++)
+    {
+        // Home to pick approach
+        create_trajectory(home_Q, pick_approach_Q, extend);
+        whole_path.emplace_back(path, *trash, false);
+
+        // Pick approach to pick
+        create_trajectory(pick_approach_Q, pick_Q, extend);
+        whole_path.emplace_back(path, *trash, false);
+
+        // Pick to pick approach
+        create_trajectory(pick_Q, pick_approach_Q, extend);
+        whole_path.emplace_back(path, *trash, true);
+
+        // Pick approach to place approach
+        create_trajectory(pick_approach_Q, place_approach_Qs[i], extend);
+        whole_path.emplace_back(path, *trash, true);
+
+        // Place approach to place
+        create_trajectory(place_approach_Qs[i], place_Qs[i], extend);
+        whole_path.emplace_back(path, *trash, true);
+
+        // Place to place approach
+        create_trajectory(place_Qs[i], place_approach_Qs[i], extend);
+        whole_path.emplace_back(path, *trash, false);
+
+        // Place approach to home
+        create_trajectory(place_approach_Qs[i], home_Q, extend);
+        whole_path.emplace_back(path, *trash, false);
+    }
+
     /*for (int i = 0; i < 100; i++)
     {
         trajectory.emplace_back(std::make_pair(30, rw::math::Q(6, 0.0+i*0.01, -1.0+i*0.01, -1.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01, 0.0+i*0.01)));
     }*/
 
+    create_trajectory(from, to, extend);
 
     running = true;
 }
@@ -451,21 +488,22 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
    *
    * NOTE: I do not clear in this one
    * */
-      UR_robot->setQ(from,rws_state);
-      getRobWorkStudio()->setState(rws_state);
+      rw::kinematics::State test_state = rws_state;
+      UR_robot->setQ(from,test_state);
+      getRobWorkStudio()->setState(test_state);
       rw::proximity::CollisionDetector detector(rws_wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
-      rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector, UR_robot, rws_state);
+      rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector, UR_robot, test_state);
       rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(UR_robot),constraint.getQConstraintPtr());
       rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
       rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, extend, rwlibs::pathplanners::RRTPlanner::RRTConnect);
 
        rw::proximity::CollisionDetector::QueryResult data;
-       UR_robot->setQ(from, rws_state);
+       UR_robot->setQ(from, test_state);
 
-       if (detector.inCollision(rws_state, &data))
+       if (detector.inCollision(test_state, &data))
            RW_THROW("Initial configuration in collision! can not plan a path.");
-       UR_robot->setQ (to, rws_state);
-       if (detector.inCollision(rws_state, &data))
+       UR_robot->setQ (to, test_state);
+       if (detector.inCollision(test_state, &data))
            RW_THROW("Final configuration in collision! can not plan a path.");
 
       //trajectory.clear();
