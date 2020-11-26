@@ -142,8 +142,8 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         place_Qs.push_back(nearQ);
     }
 
-    UR_robot->setQ(pick_Q, rws_state);
-    getRobWorkStudio()->setState(rws_state);
+    //UR_robot->setQ(pick_Q, rws_state);
+    //getRobWorkStudio()->setState(rws_state);
 }
 
 void EITPlugin::close()
