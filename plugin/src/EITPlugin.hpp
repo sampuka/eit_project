@@ -90,7 +90,6 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::math::Q home_Q;
         rw::math::Q pick_approach_Q;
         rw::math::Q pick_Q;
-        rw::math::Q home_Q;
         const unsigned int place_position_count = 2; // Must be at least 2 for now
         const double x_lim1 = 0.35;
         const double x_lim2 = -0.35;

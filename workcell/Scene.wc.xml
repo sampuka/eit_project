@@ -54,21 +54,21 @@
 	<Frame name="Wall" refframe="WORLD"  type="Fixed">
 		<RPY> 0 0 0 </RPY> <Pos> 0 0.4 0.075 </Pos>
         <Drawable name="Wall" refframe="Wall">
-            <RGB> 1 0 0 1</RGB>
+            <RGB> 0.7 0.7 0.7</RGB>
             <Box x="0.8" y="0.05" z="0.15" />
         </Drawable>
     </Frame>	
 	<Frame name="Wall2" refframe="WORLD"  type="Fixed">
 		<RPY> 0 0 0 </RPY> <Pos> 0 0.55 0.075 </Pos>
         <Drawable name="Wall2" refframe="Wall2">
-            <RGB> 1 0 0 1</RGB>
+            <RGB> 0.7 0.7 0.7</RGB>
             <Box x="0.8" y="0.05" z="0.15" />
         </Drawable>
     </Frame>		
 	<Frame name="rebar" refframe="WORLD"  type="Fixed">
 		<RPY> 0 0 90 </RPY> <Pos> 0.324 -0.5 0.01 </Pos>
         <Drawable name="rebar" refframe="rebar">
-            <RGB> 1 0 0 1</RGB>
+            <RGB> 0.8 0.8 0.8</RGB>
             <Cylinder radius="0.005" z="0.2" />
         </Drawable>
     </Frame>	  	  
@@ -80,80 +80,6 @@
             <Polytope file="parts/Scaled" />
         </Drawable>
     </Frame>		
-
-
-
-<!--	
-	<Frame name="Bottle" refframe="Table"  type="Movable" daf="true" >
-        <RPY> -90 0 90 </RPY> <Pos> 0 0.474 0.21 </Pos>
-        <Drawable name="Bottle" refframe="Bottle">
-            <Polytope file="parts/bottle" />
-        </Drawable>
-    </Frame>
-      
-	<Frame name="BottleGrip" refframe="Bottle"  type="Movable" daf="true" >
-        <RPY> 0 0 0 </RPY> <Pos> 0 0 0  </Pos>
-    </Frame>
- 
-	<Frame name="EstimateBottle" refframe="WORLD"  type="Movable" daf="true" >
-        <RPY> 0 0 0 </RPY> <Pos> 0 0 0  </Pos>
-    </Frame>
-	
-    <Frame name="EstimateBottleGrip" refframe="EstimateBottle"  type="Movable" daf="true" >
-        <RPY> 0 0 0 </RPY> <Pos> 0 0 0  </Pos>
-    </Frame>
-
-	<Frame name="WallLong" refframe="Table"  type="Movable" daf="true" >
-        <RPY> 90 0 0 </RPY> <Pos> 0 0.225 0.175</Pos>
-        <Drawable name="WallLong" refframe="WallLong">
-            <Polytope file="parts/wall_long" />
-        </Drawable>
-    </Frame>	
-  
-    <Frame name="WallShort" refframe="Table"  type="Movable" daf="true" >
-        <RPY> 90 0 0 </RPY> <Pos> 0.3 -0.325 0.175</Pos>
-        <Drawable name="WallShort" refframe="WallShort">
-            <Polytope file="parts/wall_short" />
-        </Drawable>
-    </Frame>
-
-    <!--
-	<Frame name="Square" refframe="Table"  type="Movable" daf="true" >
-        <RPY> -90 0 90 </RPY> <Pos> 0.25 0.474 0.150</Pos>
-        <Drawable name="Square" refframe="Square">
-            <Polytope file="parts/square" />
-        </Drawable>
-    </Frame>
-
-	<Frame name="Cylinder" refframe="Table"  type="Movable" daf="true" >
-        <RPY> -90 0 90 </RPY> <Pos> -0.25 0.474 0.150 </Pos>
-        <Drawable name="Cylinder" refframe="Cylinder">
-            <Polytope file="parts/cylinder" />
-        </Drawable>
-    </Frame>
-    -->
-
-
-
-<!-- Cameras -->
-<!--
-    <Frame name="Camera_Right" refframe="WORLD" type="Movable">
-	    <Pos>0 1.033 1.325</Pos>
-	    <RPY>0 0 -25</RPY>
-	    <Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
-    </Frame>
-
-    <Frame name="Camera_Left" refframe="WORLD" type="Movable">
-	    <Pos>0.2 1.033 1.325</Pos>
-	    <RPY>0 0 -25</RPY>
-	    <Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
-    </Frame>
-
-    <Frame name="Scanner25D" refframe="WORLD" type="Movable">
-	    <Pos>0 1.033 1.325</Pos>
-	    <RPY>0 0 -25</RPY>
-	    <Property name="Scanner25D" desc="[fovy,width,height]">50 640 480</Property>
-    </Frame>
 -->
 <!-- Collision -->
 
