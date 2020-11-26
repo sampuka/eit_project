@@ -85,12 +85,33 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             std::cerr << "Could not find base frame!" << std::endl;
     }
 
-    // Find place Qs
-    place_approach_Qs.clear();
-    place_Qs.clear();
-
     rw::math::Q homeQ = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
+
+    // Find pick approach Q
+    {
+        rw::math::Transform3D<> pick_approach_T(
+                rw::math::Vector3D<>(0.320, -0.500, 0.128),
+                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+
+        std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
+
+        pick_approach_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+    }
+
+    // Find pick approach Q
+    {
+        rw::math::Transform3D<> pick_T(
+                rw::math::Vector3D<>(0.320, -0.500, 0.103),
+                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+
+        std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
+
+        pick_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+    }
+
+    // Find place approach Qs
+    place_approach_Qs.clear();
 
     for (unsigned int i = 0; i < place_position_count; i++)
     {
@@ -105,6 +126,9 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         place_approach_Qs.push_back(nearQ);
     }
 
+    // Find place Qs
+    place_Qs.clear();
+
     for (unsigned int i = 0; i < place_position_count; i++)
     {
         rw::math::Transform3D<> place_T(
@@ -118,7 +142,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         place_Qs.push_back(nearQ);
     }
 
-    UR_robot->setQ(place_approach_Qs.at(1), rws_state);
+    UR_robot->setQ(pick_Q, rws_state);
     getRobWorkStudio()->setState(rws_state);
 }
 
