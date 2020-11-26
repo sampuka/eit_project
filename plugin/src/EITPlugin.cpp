@@ -85,7 +85,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             std::cerr << "Could not find base frame!" << std::endl;
     }
 
-    rw::math::Q homeQ = UR_robot->getQ(rws_state);
+    home_Q = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
 
     // Find pick approach Q
@@ -96,7 +96,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
 
-        pick_approach_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        pick_approach_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
     // Find pick approach Q
@@ -107,7 +107,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
 
-        pick_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        pick_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
     // Find place approach Qs
@@ -121,7 +121,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
 
-        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
         place_approach_Qs.push_back(nearQ);
     }
@@ -137,13 +137,13 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
 
-        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
         place_Qs.push_back(nearQ);
     }
 
-    UR_robot->setQ(pick_Q, rws_state);
-    getRobWorkStudio()->setState(rws_state);
+    //UR_robot->setQ(pick_Q, rws_state);
+    //getRobWorkStudio()->setState(rws_state);
 }
 
 void EITPlugin::close()

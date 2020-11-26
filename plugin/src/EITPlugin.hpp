@@ -87,6 +87,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 
 
         // Planning
+        rw::math::Q home_Q;
         rw::math::Q pick_approach_Q;
         rw::math::Q pick_Q;
         const unsigned int place_position_count = 2; // Must be at least 2 for now
