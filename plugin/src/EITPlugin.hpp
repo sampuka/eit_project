@@ -72,7 +72,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void create_trajectory(rw::math::Q from, rw::math::Q to, double extend);
 
     private:
-        void move_ur(rw::math::Q q);
+        void move_ur(rw::math::Q from, rw::math::Q to);
 
         bool should_shutdown = false; // Set to true -> threads stop
 
@@ -87,6 +87,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
 
 
         // Planning
+        rw::math::Q home_Q;
         rw::math::Q pick_approach_Q;
         rw::math::Q pick_Q;
         const unsigned int place_position_count = 2; // Must be at least 2 for now
