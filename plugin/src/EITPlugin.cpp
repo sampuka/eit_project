@@ -85,7 +85,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             std::cerr << "Could not find base frame!" << std::endl;
     }
 
-    rw::math::Q homeQ = UR_robot->getQ(rws_state);
+    home_Q = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
 
     // Find pick approach Q
@@ -96,7 +96,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
 
-        pick_approach_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        pick_approach_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
     // Find pick approach Q
@@ -107,7 +107,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
 
-        pick_Q = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        pick_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
     // Find place approach Qs
@@ -121,7 +121,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
 
-        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
         place_approach_Qs.push_back(nearQ);
     }
@@ -137,7 +137,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
 
-        rw::math::Q nearQ = nearest_Q(possible_Qs, homeQ); // Nearest to home position
+        rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
         place_Qs.push_back(nearQ);
     }
@@ -206,9 +206,21 @@ void EITPlugin::button_freemode()
 void EITPlugin::button_home()
 {
     std::cout << "Home button pressed!" << std::endl;
+    rw::math::Q from;
+    rw::math::Q to = home_Q;
+    double extend = 0.05;
+    running = false;
 
-    rw::math::Q q(6, 0,-1.6,-1.6,0,0,0);
-    move_ur(q);
+    if(ui_checkbox_sync->isChecked()) {
+        from = ur_receive->getActualQ();
+        UR_robot->setQ(from, rws_state);
+        getRobWorkStudio()->setState(rws_state);
+      }
+    else {
+        from = UR_robot->getQ(rws_state);
+      }
+    create_trajectory(from, to, extend);
+    running = true;
 }
 
 void EITPlugin::apply_force(double force)
@@ -272,7 +284,7 @@ void EITPlugin::button_start()
         //rw::math::Q(6, 0.0,-1.0, -1.0, 0.0, 0.0, 0.0);
     }
     std::cout << "from: " << from << std::endl;
-    rw::math::Q to(6, 0.0,-1.6,-1.6,0.0,0.0,0.0);
+    rw::math::Q to = pick_approach_Q;
 
     rw::math::Math::seed();
     double extend = 0.05;
@@ -400,15 +412,6 @@ bool EITPlugin::ur_isConnected(){
            (ur_receive == nullptr) || (!ur_receive->isConnected()) ||
            (ur_IO == nullptr));
 };
-
-void EITPlugin::move_ur(rw::math::Q q)
-{
-    std::cout << "Trying to move to " << q << "..."<< std::endl;
-    if (ui_checkbox_sync->checkState()) {
-        rw::math::Q from = UR_robot->getQ(rws_state);
-        rw::math::Q to = q;
-      }
-}
 
 double EITPlugin::Q_dist(rw::math::Q q1, rw::math::Q q2)
 {
