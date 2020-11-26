@@ -83,6 +83,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         std::vector<std::pair<unsigned int, rw::math::Q>> trajectory; // unsigned int is amount of milliseconds until next position
         unsigned int trajectory_index = 0; // Which index of the trajectory are we on, or moving towards
         rw::trajectory::InterpolatorTrajectory<rw::math::Q>::Ptr trash;
+        std::vector<std::vector<double>> path;
 
 
         // Planning
