@@ -490,8 +490,15 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       const int duration = 30;
       trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
       for (unsigned int i = 1; i < result.size(); i++) {
-          rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], duration));
-          //linInt(result[i-1], result[i], duration);
+          rw::math::Q dQ = result[i-1] - result[i];
+          double max_dq = 0;
+          for (int i = 0; i < 6; i++)
+              max_dq = (max_dq > dQ[i])? max_dq: dQ[i];
+
+          int dt = (int)(2.0 * max_dq);
+
+          rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
+
           trash->add(traj);
         }
 
