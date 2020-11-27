@@ -134,6 +134,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         double Q_dist(rw::math::Q q1, rw::math::Q q2);
         std::vector<rw::math::Q> inverseKinematics(rw::math::Transform3D<> targetT);
         rw::math::Q nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ);
+        std::vector<rw::math::Q> filterCollisionQs(std::vector<rw::math::Q> Qs);
 
         // Misc
         rwlibs::opengl::RenderImage *_textureRender, *_bgRender;
