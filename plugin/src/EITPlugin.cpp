@@ -388,12 +388,12 @@ void EITPlugin::control_loop()
 
                 //ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
 
-                log().info() << trash->x(since_moved.count()) << std::endl;
+                //log().info() << trash->x(since_moved.count()) << std::endl;
 
                 if (!path.empty()){
-                   std::cout << "HERE" << std::endl;
-                   ur_control->moveJ(path);
-                   path.clear();
+                    std::cout << "HERE" << std::endl;
+                    ur_control->moveJ(path);
+                    path.clear();
                 }
             }
             else
@@ -401,11 +401,20 @@ void EITPlugin::control_loop()
                 std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> since_moved = now-moved_ts;
 
-                if(since_moved.count() >= trash->endTime()){
-                    running = false;
-                    continue;
+                if (since_moved.count() >= whole_path[path_section].traj.endTime())
+                {
+                    if (path_section == whole_path.size()-1)
+                    {
+                        running = false;
+                        path_section = 0;
+                        continue;
+                    }
+
+                    path_section++;
+                    moved_ts = std::chrono::high_resolution_clock::now();
                 }
-                UR_robot->setQ(trash->x(since_moved.count()), rws_state);
+
+                UR_robot->setQ(whole_path[path_section].traj.x(since_moved.count()), rws_state);
                 getRobWorkStudio()->setState(rws_state);
             }
         }
