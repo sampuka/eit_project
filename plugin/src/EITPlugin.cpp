@@ -376,15 +376,8 @@ void EITPlugin::control_loop()
             ur_disconnect();
         }*/
 
-        if (running && trash != nullptr)
+        if (running)
         {
-            std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> since_moved = now-moved_ts;
-
-            if(since_moved.count() >= trash->endTime()){
-                running = false;
-                continue;
-            }
             if (ui_checkbox_sync->isChecked())
             {
                 rw::math::Q curr_q(ur_receive->getActualQ());
@@ -405,6 +398,13 @@ void EITPlugin::control_loop()
             }
             else
             {
+                std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> since_moved = now-moved_ts;
+
+                if(since_moved.count() >= trash->endTime()){
+                    running = false;
+                    continue;
+                }
                 UR_robot->setQ(trash->x(since_moved.count()), rws_state);
                 getRobWorkStudio()->setState(rws_state);
             }
