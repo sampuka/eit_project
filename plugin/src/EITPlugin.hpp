@@ -129,7 +129,11 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void ur_connect();
         void ur_disconnect();
         bool ur_isConnected();
-        
+
+        rw::math::Q path_end_Q = rw::math::Q(6);
+        double laste = 0;
+        double edt = 1;
+
         // Utility
         double Q_dist(rw::math::Q q1, rw::math::Q q2);
         std::vector<rw::math::Q> inverseKinematics(rw::math::Transform3D<> targetT);

@@ -391,21 +391,28 @@ void EITPlugin::control_loop()
         {
             if (ui_checkbox_sync->isChecked())
             {
-                if(!ur_control->isProgramRunning()){
-                    if (path_section == whole_path.size()-1)
+                rw::math::Q curr_q(ur_receive->getActualQ());
+
+                UR_robot->setQ(curr_q, rws_state);
+                getRobWorkStudio()->setState(rws_state);
+                std::cout << Q_dist(curr_q, path_end_Q) << std::endl;
+                double dt = abs(laste - Q_dist(curr_q, path_end_Q));
+                laste = Q_dist(curr_q, path_end_Q);
+                std::cout << dt << std::endl;
+                if( (dt < 0.01 && laste < 0.5) || path_section == 0){
+                    std::cout << "Close Q" << std::endl;
+                    if (path_section == whole_path.size())
                     {
                         running = false;
                         path_section = 0;
                         continue;
                     }
                     ur_control->moveJ(whole_path[path_section].path);
+                    for (int i = 0; i < 6; ++i) {
+                        path_end_Q[i] = whole_path[path_section].path.back()[i];
+                    };
                     path_section++;
                 }
-
-                rw::math::Q curr_q(ur_receive->getActualQ());
-
-                UR_robot->setQ(curr_q, rws_state);
-                getRobWorkStudio()->setState(rws_state);
             }
             else
             {
@@ -579,7 +586,6 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
         path.push_back(p);
       }
 
-      const int duration = 30;
       trash = rw::trajectory::InterpolatorTrajectory<rw::math::Q>();
 
       for (unsigned int i = 1; i < result.size(); i++) {
