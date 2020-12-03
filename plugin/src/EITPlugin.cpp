@@ -91,7 +91,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     // Find pick approach Q
     {
         rw::math::Transform3D<> pick_approach_T(
-                rw::math::Vector3D<>(0.320, -0.500, 0.128),
+                rw::math::Vector3D<>(0.324, -0.500, 0.140),
                 rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
@@ -100,10 +100,10 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         pick_approach_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
-    // Find pick approach Q
+    // Find pick Q
     {
         rw::math::Transform3D<> pick_T(
-                rw::math::Vector3D<>(0.320, -0.500, 0.115),
+                rw::math::Vector3D<>(0.324, -0.500, 0.115),
                 rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
