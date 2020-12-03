@@ -78,6 +78,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR5e_2018");
         gripper = rws_wc->findDevice<rw::models::TreeDevice>("DHPS");
         base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR5e_2018.Base");
+        rebar_frame = rws_wc->findFrame<rw::kinematics::MovableFrame>("rebar");
 
         if (UR_robot == nullptr)
             std::cerr << "Could not find UR!" << std::endl;
@@ -87,6 +88,9 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
         if (base_frame == nullptr)
             std::cerr << "Could not find base frame!" << std::endl;
+
+        if (rebar_frame == nullptr)
+            std::cerr << "Could not find rebar frame!" << std::endl;
     }
 
     gripper->setQ(rw::math::Q(1, 0.005), rws_state);
@@ -95,11 +99,19 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     home_Q = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
 
+    rw::math::Transform3D<> rebarT = rebar_frame->wTf(rws_state);
+
     // Find pick approach Q
     {
+        /*
         rw::math::Transform3D<> pick_approach_T(
                 rw::math::Vector3D<>(0.324, -0.500, 0.140),
                 rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
+        */
+
+        rw::math::Transform3D<> pick_approach_T = rebarT * rw::math::Transform3D<>(
+                rw::math::Vector3D<>(0.0, 0.061, 0.002),
+                rw::math::RPY<>(2.033, 1.561, -2.683));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -109,9 +121,15 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
 
     // Find pick Q
     {
+        /*
         rw::math::Transform3D<> pick_T(
                 rw::math::Vector3D<>(0.324, -0.500, 0.108),
                 rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
+        */
+
+        rw::math::Transform3D<> pick_T = rebarT * rw::math::Transform3D<>(
+                rw::math::Vector3D<>(0.0, 0.012, 0.002),
+                rw::math::RPY<>(2.033, 1.561, -2.683));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -125,7 +143,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     for (unsigned int i = 0; i < place_position_count; i++)
     {
         rw::math::Transform3D<> approach_T(
-                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.280),
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.220),
                 rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
@@ -142,7 +160,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     for (unsigned int i = 0; i < place_position_count; i++)
     {
         rw::math::Transform3D<> place_T(
-                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.240),
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.170),
                 rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
@@ -153,7 +171,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         place_Qs.push_back(nearQ);
     }
 
-    //UR_robot->setQ(place_approach_Qs[0], rws_state);
+    //UR_robot->setQ(place_Qs[0], rws_state);
     //getRobWorkStudio()->setState(rws_state);
 }
 

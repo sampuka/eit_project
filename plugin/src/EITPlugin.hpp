@@ -115,6 +115,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::models::SerialDevice::Ptr UR_robot;
         rw::models::TreeDevice::Ptr gripper;
         rw::kinematics::Frame::Ptr base_frame;
+        rw::kinematics::MovableFrame::Ptr rebar_frame;
 
         // UR Robot
         const std::string ur_ip = "10.10.1.100";
