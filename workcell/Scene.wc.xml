@@ -25,8 +25,8 @@
 	</Frame>
 
 	<Frame name="finger_1" refframe="DHPS.RightFinger"  type="Movable">
-		<RPY> 0 180 90 </RPY> 
-    <Pos> 0 0.075 -0.0132</Pos>    
+		<RPY> 0 0 90 </RPY> 
+    <Pos> 0 0.075 0.0132</Pos>    
         <Drawable name="finger_1" refframe="finger_1">
             <RGB> 0 1 0 </RGB>
             <Polytope file="parts/Festo_Gripper_V5" />
@@ -34,8 +34,8 @@
     </Frame>	
 
 	<Frame name="finger_2" refframe="DHPS.LeftFinger"  type="Movable">
-		<RPY> 0 0 90 </RPY> 
-    <Pos> 0 0.075 0.0132</Pos>    
+		<RPY> 0 180 90 </RPY> 
+    <Pos> 0 0.075 -0.0132</Pos>    
         <Drawable name="finger_2" refframe="finger_2">
             <RGB> 0 0 0 </RGB>
             <Polytope file="parts/Festo_Gripper_V5" />
