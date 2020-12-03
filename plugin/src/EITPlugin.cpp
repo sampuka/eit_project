@@ -92,7 +92,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> pick_approach_T(
                 rw::math::Vector3D<>(0.320, -0.500, 0.128),
-                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -104,7 +104,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> pick_T(
                 rw::math::Vector3D<>(0.320, -0.500, 0.115),
-                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -329,6 +329,7 @@ void EITPlugin::button_start()
         whole_path.emplace_back(path, trash, false);
     }
 
+    /*
     for (unsigned int i = 0; i < whole_path.size(); i++)
     {
         std::cout << i << ' ' << whole_path[i].traj.endTime() << ' ' << whole_path[i].traj.getSegmentsCount() << std::endl;
@@ -338,6 +339,7 @@ void EITPlugin::button_start()
             std::cout << j << ": " << whole_path[i].traj.x(j) << std::endl;
         }
     }
+    */
 
     /*for (int i = 0; i < 100; i++)
     {
@@ -389,21 +391,21 @@ void EITPlugin::control_loop()
         {
             if (ui_checkbox_sync->isChecked())
             {
+                if(!ur_control->isProgramRunning()){
+                    if (path_section == whole_path.size()-1)
+                    {
+                        running = false;
+                        path_section = 0;
+                        continue;
+                    }
+                    ur_control->moveJ(whole_path[path_section].path);
+                    path_section++;
+                }
+
                 rw::math::Q curr_q(ur_receive->getActualQ());
 
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
-
-
-                //ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
-
-                //log().info() << trash->x(since_moved.count()) << std::endl;
-
-                if (!path.empty()){
-                    std::cout << "HERE" << std::endl;
-                    ur_control->moveJ(path);
-                    path.clear();
-                }
             }
             else
             {
@@ -493,7 +495,7 @@ rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
     }
 
     rw::math::Q best_Q;
-    double best_Q_dist = 99999999;
+    double best_Q_dist = std::numeric_limits<double>::max();
 
     for (const auto& Q : Qs)
     {
@@ -579,13 +581,14 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
 
       const int duration = 30;
       trash = rw::trajectory::InterpolatorTrajectory<rw::math::Q>();
+
       for (unsigned int i = 1; i < result.size(); i++) {
           rw::math::Q dQ = result[i-1] - result[i];
           double max_dq = 0;
-          for (int i = 0; i < 6; i++)
-              max_dq = (max_dq > dQ[i])? max_dq: dQ[i];
+          for (int j = 0; j < 6; j++)
+              max_dq = (max_dq > dQ[j])? max_dq: dQ[j];
 
-          int dt = (int)(2.0 * max_dq);
+          double dt = (2.0 * max_dq);
 
           rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
 
