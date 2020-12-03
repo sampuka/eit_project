@@ -44,7 +44,7 @@
 
 	<Frame name="Drop" refframe="WORLD"  type="Fixed">
 		<RPY> 180 180 90 </RPY> 
-    <Pos> 0.35 -0.5 0.01 </Pos>    
+    <Pos> 0.35 -0.5 0.02 </Pos>    
         <Drawable name="Drop" refframe="Drop">
             <RGB> 0 0 0.7 </RGB>
             <Polytope file="parts/MagDropScaled" />
@@ -66,7 +66,7 @@
         </Drawable>
     </Frame>		
 	<Frame name="rebar" refframe="WORLD"  type="Fixed">
-		<RPY> 0 0 90 </RPY> <Pos> 0.324 -0.5 0.01 </Pos>
+		<RPY> 0 0 90 </RPY> <Pos> 0.324 -0.5 0.023 </Pos>
         <Drawable name="rebar" refframe="rebar">
             <RGB> 0.8 0.8 0.8</RGB>
             <Cylinder radius="0.005" z="0.2" />
