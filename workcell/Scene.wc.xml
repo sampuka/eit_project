@@ -20,8 +20,8 @@
 	</Frame>
     <Include file="DHPS/DHPS.wc.xml" />
 
-	<Frame name="GraspTCP" refframe="UR5e_2018.Flange" type="Fixed">
-		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
+	<Frame name="GraspTCP" refframe="Gripper" type="Fixed">
+		<RPY>0 0 0</RPY> <Pos>0 0 0.085</Pos>
 	</Frame>
 
 	<Frame name="finger_1" refframe="DHPS.RightFinger"  type="Movable">
