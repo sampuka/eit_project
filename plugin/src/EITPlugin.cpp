@@ -312,11 +312,11 @@ void EITPlugin::button_start()
         whole_path.emplace_back(path, trash, false);
 
         // Pick approach to pick
-        create_trajectory(pick_approach_Q, pick_Q, extend);
+        create_trajectory(pick_approach_Q, pick_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, false);
 
         // Pick to pick approach
-        create_trajectory(pick_Q, pick_approach_Q, extend);
+        create_trajectory(pick_Q, pick_approach_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, true);
 
         // Pick approach to place approach
@@ -324,11 +324,11 @@ void EITPlugin::button_start()
         whole_path.emplace_back(path, trash, true);
 
         // Place approach to place
-        create_trajectory(place_approach_Qs[i], place_Qs[i], extend);
+        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, true);
 
         // Place to place approach
-        create_trajectory(place_Qs[i], place_approach_Qs[i], extend);
+        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, false);
 
         // Place approach to home
@@ -538,7 +538,7 @@ std::vector<rw::math::Q> EITPlugin::filterCollisionQs(std::vector<rw::math::Q> Q
     return colfree;
 }
 
-void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend)
+void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel)
 {
   /*
    * TODO: Make path planning, from home to pick-up, open gripper and move down, close gripper, back to pick-up,
@@ -580,7 +580,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       path.clear();
       for(auto q: result){
         std::vector<double> p = q.toStdVector();
-        p.push_back(0.5);
+        p.push_back(vel);
         p.push_back(0.5);
         p.push_back(0.025);
         path.push_back(p);
@@ -595,7 +595,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
           for (int j = 0; j < 6; j++)
               max_dq = (max_dq > std::abs(dQ[j]))? max_dq: std::abs(dQ[j]);
 
-          double dt = (2.0 * max_dq);
+          double dt = max_dq / vel;
 
           rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
 

@@ -81,7 +81,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void apply_force(double force);
         void button_start();
         void sync_pressed(bool);
-        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend);
+        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel = 0.5);
 
     private:
         void move_ur(rw::math::Q from, rw::math::Q to);
