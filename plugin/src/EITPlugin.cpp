@@ -76,14 +76,21 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         }
 
         UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
+        gripper = rws_wc->findDevice<rw::models::TreeDevice>("DHPS");
         base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR-6-85-5-A.BaseMov");
 
         if (UR_robot == nullptr)
             std::cerr << "Could not find UR!" << std::endl;
 
+        if (gripper == nullptr)
+            std::cerr << "Could not find DHPS!" << std::endl;
+
         if (base_frame == nullptr)
             std::cerr << "Could not find base frame!" << std::endl;
     }
+
+    gripper->setQ(rw::math::Q(1, 0.005), rws_state);
+    getRobWorkStudio()->setState(rws_state);
 
     home_Q = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);

@@ -113,6 +113,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
         rw::models::SerialDevice::Ptr UR_robot;
+        rw::models::TreeDevice::Ptr gripper;
         rw::kinematics::Frame::Ptr base_frame;
 
         // UR Robot
