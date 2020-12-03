@@ -380,21 +380,21 @@ void EITPlugin::control_loop()
         {
             if (ui_checkbox_sync->isChecked())
             {
+                if(!ur_control->isProgramRunning()){
+                    if (path_section == whole_path.size()-1)
+                    {
+                        running = false;
+                        path_section = 0;
+                        continue;
+                    }
+                    ur_control->moveJ(whole_path[path_section].path);
+                    path_section++;
+                }
+
                 rw::math::Q curr_q(ur_receive->getActualQ());
 
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
-
-
-                //ur_connection->moveJ(trash->x(since_moved.count()), 0.5, 0.5);
-
-                //log().info() << trash->x(since_moved.count()) << std::endl;
-
-                if (!path.empty()){
-                    std::cout << "HERE" << std::endl;
-                    ur_control->moveJ(path);
-                    path.clear();
-                }
             }
             else
             {
@@ -484,7 +484,7 @@ rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
     }
 
     rw::math::Q best_Q;
-    double best_Q_dist = 99999999;
+    double best_Q_dist = std::numeric_limits<double>::max();
 
     for (const auto& Q : Qs)
     {
@@ -569,12 +569,13 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       }
 
       const int duration = 30;
+
       trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
       for (unsigned int i = 1; i < result.size(); i++) {
           rw::math::Q dQ = result[i-1] - result[i];
           double max_dq = 0;
-          for (int i = 0; i < 6; i++)
-              max_dq = (max_dq > dQ[i])? max_dq: dQ[i];
+          for (int j = 0; j < 6; j++)
+              max_dq = (max_dq > dQ[j])? max_dq: dQ[j];
 
           int dt = (int)(2.0 * max_dq);
 
