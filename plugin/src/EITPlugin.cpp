@@ -95,6 +95,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
+        possible_Qs = filterCollisionQs(possible_Qs);
 
         pick_approach_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
@@ -106,6 +107,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
+        possible_Qs = filterCollisionQs(possible_Qs);
 
         pick_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
@@ -120,6 +122,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
+        possible_Qs = filterCollisionQs(possible_Qs);
 
         rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
@@ -136,6 +139,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
+        possible_Qs = filterCollisionQs(possible_Qs);
 
         rw::math::Q nearQ = nearest_Q(possible_Qs, home_Q); // Nearest to home position
 
@@ -465,6 +469,11 @@ std::vector<rw::math::Q> EITPlugin::inverseKinematics(rw::math::Transform3D<> ta
 
 rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
 {
+    if (Qs.size() == 0)
+    {
+        std::cout << "Error: finding nearest Q of empty list" << std::endl;
+    }
+
     rw::math::Q best_Q;
     double best_Q_dist = 99999999;
 
@@ -479,6 +488,27 @@ rw::math::Q EITPlugin::nearest_Q(std::vector<rw::math::Q> Qs, rw::math::Q nearQ)
     }
 
     return best_Q;
+}
+
+std::vector<rw::math::Q> EITPlugin::filterCollisionQs(std::vector<rw::math::Q> Qs)
+{
+    rw::proximity::CollisionDetector detector(rws_wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
+
+    std::vector<rw::math::Q> colfree;
+
+    rw::kinematics::State test_state = rws_state;
+
+    for (const rw::math::Q &q : Qs)
+    {
+        UR_robot->setQ(q, test_state);
+
+        if (!detector.inCollision(test_state))
+        {
+            colfree.push_back(q);
+        }
+    }
+
+    return colfree;
 }
 
 void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend)
