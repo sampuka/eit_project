@@ -396,30 +396,25 @@ void EITPlugin::control_loop()
 
         if (running)
         {
-            if (ui_checkbox_sync->isChecked())
-            {
+            if (ui_checkbox_sync->isChecked()) {
                 rw::math::Q curr_q(ur_receive->getActualQ());
 
                 UR_robot->setQ(curr_q, rws_state);
                 getRobWorkStudio()->setState(rws_state);
-                std::cout << Q_dist(curr_q, path_end_Q) << std::endl;
-                double dt = abs(laste - Q_dist(curr_q, path_end_Q));
-                laste = Q_dist(curr_q, path_end_Q);
-                std::cout << dt << std::endl;
-                if( (dt < 0.01 && laste < 0.5) || path_section == 0){
-                    std::cout << "Close Q" << std::endl;
-                    if (path_section == whole_path.size())
-                    {
-                        running = false;
-                        path_section = 0;
-                        continue;
-                    }
-                    ur_control->moveJ(whole_path[path_section].path);
-                    for (int i = 0; i < 6; ++i) {
-                        path_end_Q[i] = whole_path[path_section].path.back()[i];
-                    };
-                    path_section++;
+
+                if (path_section == whole_path.size()) {
+                    running = false;
+                    path_section = 0;
+                    continue;
                 }
+                if (ur_receive->getDigitalOutState(0) != whole_path[path_section].grip) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    ur_IO->setStandardDigitalOut(0, whole_path[path_section].grip);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+                ur_control->moveJ(whole_path[path_section].path);
+                path_section++;
+
             }
             else
             {
@@ -589,7 +584,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
         std::vector<double> p = q.toStdVector();
         p.push_back(vel);
         p.push_back(0.5);
-        p.push_back(0.025);
+        p.push_back(0.0);
         path.push_back(p);
       }
 
