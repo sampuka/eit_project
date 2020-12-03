@@ -21,7 +21,7 @@
  <Frame name="TCPLeft" refframe="LeftFinger" type="EndEffector">
  </Frame>
 <!-- Define limits -->
- <PosLimit refjoint="RightFinger" min="0" max="0.001" />
+ <PosLimit refjoint="RightFinger" min="0" max="0.005" />
  <VelLimit refjoint="RightFinger" max="0.06" />
 
 <!-- And now we add the geometry -->

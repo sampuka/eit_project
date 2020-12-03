@@ -81,7 +81,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void apply_force(double force);
         void button_start();
         void sync_pressed(bool);
-        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend);
+        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel = 0.5);
 
     private:
         void move_ur(rw::math::Q from, rw::math::Q to);
@@ -113,6 +113,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::models::WorkCell::Ptr rws_wc;
         rw::kinematics::State rws_state;
         rw::models::SerialDevice::Ptr UR_robot;
+        rw::models::TreeDevice::Ptr gripper;
         rw::kinematics::Frame::Ptr base_frame;
 
         // UR Robot

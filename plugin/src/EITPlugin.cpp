@@ -76,14 +76,21 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         }
 
         UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
+        gripper = rws_wc->findDevice<rw::models::TreeDevice>("DHPS");
         base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR-6-85-5-A.BaseMov");
 
         if (UR_robot == nullptr)
             std::cerr << "Could not find UR!" << std::endl;
 
+        if (gripper == nullptr)
+            std::cerr << "Could not find DHPS!" << std::endl;
+
         if (base_frame == nullptr)
             std::cerr << "Could not find base frame!" << std::endl;
     }
+
+    gripper->setQ(rw::math::Q(1, 0.005), rws_state);
+    getRobWorkStudio()->setState(rws_state);
 
     home_Q = UR_robot->getQ(rws_state);
     rw::math::Transform3D<> homeT = base_frame->wTf(rws_state);
@@ -91,7 +98,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     // Find pick approach Q
     {
         rw::math::Transform3D<> pick_approach_T(
-                rw::math::Vector3D<>(0.320, -0.500, 0.128),
+                rw::math::Vector3D<>(0.324, -0.500, 0.140),
                 rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
@@ -100,10 +107,10 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         pick_approach_Q = nearest_Q(possible_Qs, home_Q); // Nearest to home position
     }
 
-    // Find pick approach Q
+    // Find pick Q
     {
         rw::math::Transform3D<> pick_T(
-                rw::math::Vector3D<>(0.320, -0.500, 0.115),
+                rw::math::Vector3D<>(0.324, -0.500, 0.108),
                 rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
@@ -118,7 +125,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     for (unsigned int i = 0; i < place_position_count; i++)
     {
         rw::math::Transform3D<> approach_T(
-                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.465, 0.268),
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.280),
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
@@ -135,7 +142,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     for (unsigned int i = 0; i < place_position_count; i++)
     {
         rw::math::Transform3D<> place_T(
-                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.465, 0.238),
+                rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.240),
                 rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
@@ -305,11 +312,11 @@ void EITPlugin::button_start()
         whole_path.emplace_back(path, trash, false);
 
         // Pick approach to pick
-        create_trajectory(pick_approach_Q, pick_Q, extend);
+        create_trajectory(pick_approach_Q, pick_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, false);
 
         // Pick to pick approach
-        create_trajectory(pick_Q, pick_approach_Q, extend);
+        create_trajectory(pick_Q, pick_approach_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, true);
 
         // Pick approach to place approach
@@ -317,11 +324,11 @@ void EITPlugin::button_start()
         whole_path.emplace_back(path, trash, true);
 
         // Place approach to place
-        create_trajectory(place_approach_Qs[i], place_Qs[i], extend);
+        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, true);
 
         // Place to place approach
-        create_trajectory(place_Qs[i], place_approach_Qs[i], extend);
+        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, false);
 
         // Place approach to home
@@ -538,7 +545,7 @@ std::vector<rw::math::Q> EITPlugin::filterCollisionQs(std::vector<rw::math::Q> Q
     return colfree;
 }
 
-void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend)
+void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel)
 {
   /*
    * TODO: Make path planning, from home to pick-up, open gripper and move down, close gripper, back to pick-up,
@@ -580,7 +587,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       path.clear();
       for(auto q: result){
         std::vector<double> p = q.toStdVector();
-        p.push_back(0.5);
+        p.push_back(vel);
         p.push_back(0.5);
         p.push_back(0.025);
         path.push_back(p);
@@ -594,7 +601,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
           for (int j = 0; j < 6; j++)
               max_dq = (max_dq > std::abs(dQ[j]))? max_dq: std::abs(dQ[j]);
 
-          double dt = (2.0 * max_dq);
+          double dt = max_dq / vel;
 
           rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
 
