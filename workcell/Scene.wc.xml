@@ -16,7 +16,7 @@
         <Include file="UR5e_2018/UR5e.xml" />
         
 	<Frame name="Gripper" refframe="UR5e_2018.Flange" type="Movable">
-		<RPY>90 0 0</RPY> <Pos>0 0 0</Pos>
+		<RPY>0 0 0</RPY> <Pos>0 0 0</Pos>
 	</Frame>
     <Include file="DHPS/DHPS.wc.xml" />
 

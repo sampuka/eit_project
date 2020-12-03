@@ -99,7 +99,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> pick_approach_T(
                 rw::math::Vector3D<>(0.324, -0.500, 0.140),
-                rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_approach_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -111,7 +111,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> pick_T(
                 rw::math::Vector3D<>(0.324, -0.500, 0.108),
-                rw::math::RPY<>(-180*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -126,7 +126,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> approach_T(
                 rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.280),
-                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*approach_T);
         possible_Qs = filterCollisionQs(possible_Qs);
@@ -143,7 +143,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
     {
         rw::math::Transform3D<> place_T(
                 rw::math::Vector3D<>(x_lim1 + (x_lim2-x_lim1)*i/(place_position_count-1.0), 0.475, 0.240),
-                rw::math::RPY<>(0, 0, 180*rw::math::Deg2Rad));
+                rw::math::RPY<>(90*rw::math::Deg2Rad, 0, 180*rw::math::Deg2Rad));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*place_T);
         possible_Qs = filterCollisionQs(possible_Qs);
