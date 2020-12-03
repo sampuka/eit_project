@@ -262,7 +262,6 @@ void EITPlugin::apply_force(double force)
       std::this_thread::sleep_for(duration);
       ur_control->forceModeStop();
   }
-
 }
 
 void EITPlugin::button_start()
@@ -297,37 +296,47 @@ void EITPlugin::button_start()
     whole_path.clear();
 
     create_trajectory(from, home_Q, extend);
-    whole_path.emplace_back(path, *trash, false);
+    whole_path.emplace_back(path, trash, false);
 
     for (unsigned int i = 0; i < 1; i++)
     {
         // Home to pick approach
         create_trajectory(home_Q, pick_approach_Q, extend);
-        whole_path.emplace_back(path, *trash, false);
+        whole_path.emplace_back(path, trash, false);
 
         // Pick approach to pick
         create_trajectory(pick_approach_Q, pick_Q, extend);
-        whole_path.emplace_back(path, *trash, false);
+        whole_path.emplace_back(path, trash, false);
 
         // Pick to pick approach
         create_trajectory(pick_Q, pick_approach_Q, extend);
-        whole_path.emplace_back(path, *trash, true);
+        whole_path.emplace_back(path, trash, true);
 
         // Pick approach to place approach
         create_trajectory(pick_approach_Q, place_approach_Qs[i], extend);
-        whole_path.emplace_back(path, *trash, true);
+        whole_path.emplace_back(path, trash, true);
 
         // Place approach to place
         create_trajectory(place_approach_Qs[i], place_Qs[i], extend);
-        whole_path.emplace_back(path, *trash, true);
+        whole_path.emplace_back(path, trash, true);
 
         // Place to place approach
         create_trajectory(place_Qs[i], place_approach_Qs[i], extend);
-        whole_path.emplace_back(path, *trash, false);
+        whole_path.emplace_back(path, trash, false);
 
         // Place approach to home
         create_trajectory(place_approach_Qs[i], home_Q, extend);
-        whole_path.emplace_back(path, *trash, false);
+        whole_path.emplace_back(path, trash, false);
+    }
+
+    for (unsigned int i = 0; i < whole_path.size(); i++)
+    {
+        std::cout << i << ' ' << whole_path[i].traj.endTime() << ' ' << whole_path[i].traj.getSegmentsCount() << std::endl;
+
+        for (double j = whole_path[i].traj.startTime(); j < whole_path[i].traj.endTime(); j+= 0.1)
+        {
+            std::cout << j << ": " << whole_path[i].traj.x(j) << std::endl;
+        }
     }
 
     /*for (int i = 0; i < 100; i++)
@@ -555,7 +564,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       rw::trajectory::QPath result;
       if (planner->query(from,to,result))
       {
-           std::cout << "Planned path successfully." << std::endl;
+           std::cout << "Planned path successfully with size " << result.size() << "." << std::endl;
       }
 
 
@@ -569,7 +578,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       }
 
       const int duration = 30;
-      trash = rw::ownedPtr(new rw::trajectory::InterpolatorTrajectory<rw::math::Q>());
+      trash = rw::trajectory::InterpolatorTrajectory<rw::math::Q>();
       for (unsigned int i = 1; i < result.size(); i++) {
           rw::math::Q dQ = result[i-1] - result[i];
           double max_dq = 0;
@@ -580,7 +589,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
 
           rw::trajectory::LinearInterpolator<rw::math::Q>::Ptr traj = rw::ownedPtr(new rw::trajectory::LinearInterpolator<rw::math::Q> (result[i-1], result[i], dt));
 
-          trash->add(traj);
+          trash.add(traj);
         }
 
 
