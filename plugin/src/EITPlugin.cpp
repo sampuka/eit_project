@@ -586,7 +586,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
           rw::math::Q dQ = result[i-1] - result[i];
           double max_dq = 0;
           for (int j = 0; j < 6; j++)
-              max_dq = (max_dq > dQ[j])? max_dq: dQ[j];
+              max_dq = (max_dq > std::abs(dQ[j]))? max_dq: std::abs(dQ[j]);
 
           double dt = (2.0 * max_dq);
 
