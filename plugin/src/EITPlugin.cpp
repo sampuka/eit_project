@@ -334,6 +334,7 @@ void EITPlugin::button_start()
     create_trajectory(from, to, extend);
 
     running = true;
+    path_section = 0;
 }
 
 void EITPlugin::sync_pressed(bool checkbox_state) {

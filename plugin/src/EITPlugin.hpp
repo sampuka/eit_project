@@ -97,7 +97,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::trajectory::InterpolatorTrajectory<rw::math::Q>::Ptr trash;
         std::vector<std::vector<double>> path;
         std::vector<SubPath> whole_path;
-
+        unsigned int path_section = 0;
 
         // Planning
         rw::math::Q home_Q;
