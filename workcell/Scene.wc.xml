@@ -11,7 +11,7 @@
 	</Frame>
 
 	<Frame name="URReference" refframe="Table" type="Movable">
-	    <RPY>-112.5 0 0</RPY> <Pos> 0.275 0.025 0.11</Pos>
+	    <RPY>-112.5 0 0</RPY> <Pos> 0.275 0.025 0.135</Pos>
 	</Frame>
         <Include file="UR5e_2018/UR5e.xml" />
         
