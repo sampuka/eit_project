@@ -75,9 +75,9 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
             getRobWorkStudio()->getWorkCellScene()->addRender("BackgroundImage",_bgRender,bgFrame);
         }
 
-        UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
+        UR_robot = rws_wc->findDevice<rw::models::SerialDevice>("UR5e_2018");
         gripper = rws_wc->findDevice<rw::models::TreeDevice>("DHPS");
-        base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR-6-85-5-A.BaseMov");
+        base_frame = rws_wc->findFrame<rw::kinematics::Frame>("UR5e_2018.Base");
 
         if (UR_robot == nullptr)
             std::cerr << "Could not find UR!" << std::endl;

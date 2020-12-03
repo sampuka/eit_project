@@ -13,14 +13,14 @@
 	<Frame name="URReference" refframe="Table" type="Movable">
 	    <RPY>-112.5 0 0</RPY> <Pos> 0.275 0.025 0.11</Pos>
 	</Frame>
-    <Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
-
-	<Frame name="Gripper" refframe="UR-6-85-5-A.TCP" type="Movable">
-		<RPY>90 0 0</RPY> <Pos>0 0 0.0001</Pos>
+        <Include file="UR5e_2018/UR5e.xml" />
+        
+	<Frame name="Gripper" refframe="UR5e_2018.Flange" type="Movable">
+		<RPY>90 0 0</RPY> <Pos>0 0 0</Pos>
 	</Frame>
     <Include file="DHPS/DHPS.wc.xml" />
 
-	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
+	<Frame name="GraspTCP" refframe="UR5e_2018.Flange" type="Fixed">
 		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
 	</Frame>
 
