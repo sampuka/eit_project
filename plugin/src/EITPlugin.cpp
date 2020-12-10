@@ -345,12 +345,12 @@ void EITPlugin::create_whole_path()
         status_lambda(7*i+2);
 
         // Pick approach to pick
-        create_trajectory(pick_approach_Q, pick_Q, extend, 0.15);
+        create_trajectory(pick_approach_Q, pick_Q, extend, 0.2);
         whole_path.emplace_back(path, trash, false);
         status_lambda(7*i+3);
 
         // Pick to pick approach
-        create_trajectory(pick_Q, pick_approach_Q, extend, 0.15);
+        create_trajectory(pick_Q, pick_approach_Q, extend, 0.2);
         whole_path.emplace_back(path, trash, true);
         status_lambda(7*i+4);
 
@@ -360,12 +360,12 @@ void EITPlugin::create_whole_path()
         status_lambda(7*i+5);
 
         // Place approach to place
-        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.15);
+        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.2);
         whole_path.emplace_back(path, trash, true);
         status_lambda(7*i+6);
 
         // Place to place approach
-        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.15);
+        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.2);
         whole_path.emplace_back(path, trash, false);
         status_lambda(7*i+7);
 
@@ -446,7 +446,7 @@ void EITPlugin::control_loop()
                     path_section = 0;
                     continue;
                 }
-                if (path_section == 0 || whole_path[path_section - 1 ].grip != whole_path[path_section].grip) {
+                if (path_section == 0 || (whole_path[path_section - 1 ].grip != whole_path[path_section].grip)) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     ur_IO->setStandardDigitalOut(0, whole_path[path_section].grip);
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -622,7 +622,7 @@ void EITPlugin::create_trajectory(rw::math::Q from, rw::math::Q to, double exten
       for(auto q: result){
         std::vector<double> p = q.toStdVector();
         p.push_back(vel);
-        p.push_back(0.5);
+        p.push_back(1.4);
         p.push_back(0.0);
         path.push_back(p);
       }
