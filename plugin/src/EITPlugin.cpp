@@ -446,7 +446,7 @@ void EITPlugin::control_loop()
                     path_section = 0;
                     continue;
                 }
-                if (ur_receive->getDigitalOutState(0) != whole_path[path_section].grip) {
+                if (path_section == 0 || whole_path[path_section - 1 ].grip != whole_path[path_section].grip) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     ur_IO->setStandardDigitalOut(0, whole_path[path_section].grip);
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
