@@ -81,7 +81,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         void apply_force(double force);
         void button_start();
         void sync_pressed(bool);
-        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel = 0.5);
+        void create_trajectory(rw::math::Q from, rw::math::Q to, double extend, double vel = 0.8);
 
     private:
         void move_ur(rw::math::Q from, rw::math::Q to);
@@ -103,7 +103,7 @@ class EITPlugin: public rws::RobWorkStudioPlugin, private Ui::EITPlugin
         rw::math::Q home_Q;
         rw::math::Q pick_approach_Q;
         rw::math::Q pick_Q;
-        const unsigned int place_position_count = 5; // Must be at least 2 for now
+        const unsigned int place_position_count = 3; // Must be at least 2 for now
         const double x_lim1 = 0.35;
         const double x_lim2 = -0.35;
         std::vector<rw::math::Q> place_approach_Qs;
