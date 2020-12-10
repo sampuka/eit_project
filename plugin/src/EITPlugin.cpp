@@ -128,7 +128,7 @@ void EITPlugin::open(rw::models::WorkCell* workcell)
         */
 
         rw::math::Transform3D<> pick_T = rebarT * rw::math::Transform3D<>(
-                rw::math::Vector3D<>(0.0, 0.012, 0.002),
+                rw::math::Vector3D<>(0.0, 0.015, 0.002),
                 rw::math::RPY<>(2.033, 1.561, -2.683));
 
         std::vector<rw::math::Q> possible_Qs = inverseKinematics(rw::math::inverse(homeT)*pick_T);
@@ -345,12 +345,12 @@ void EITPlugin::create_whole_path()
         status_lambda(7*i+2);
 
         // Pick approach to pick
-        create_trajectory(pick_approach_Q, pick_Q, extend, 0.1);
+        create_trajectory(pick_approach_Q, pick_Q, extend, 0.15);
         whole_path.emplace_back(path, trash, false);
         status_lambda(7*i+3);
 
         // Pick to pick approach
-        create_trajectory(pick_Q, pick_approach_Q, extend, 0.1);
+        create_trajectory(pick_Q, pick_approach_Q, extend, 0.15);
         whole_path.emplace_back(path, trash, true);
         status_lambda(7*i+4);
 
@@ -360,12 +360,12 @@ void EITPlugin::create_whole_path()
         status_lambda(7*i+5);
 
         // Place approach to place
-        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.1);
+        create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.15);
         whole_path.emplace_back(path, trash, true);
         status_lambda(7*i+6);
 
         // Place to place approach
-        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.1);
+        create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.15);
         whole_path.emplace_back(path, trash, false);
         status_lambda(7*i+7);
 
