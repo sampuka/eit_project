@@ -293,6 +293,13 @@ void EITPlugin::button_start()
 {
     std::cout << "Start button pressed!" << std::endl;
 
+    if (create_whole_path_thread.joinable())
+        create_whole_path_thread.join();
+    create_whole_path_thread = std::thread(&EITPlugin::create_whole_path, this);
+}
+
+void EITPlugin::create_whole_path()
+{
     trajectory.clear();
     trajectory_index = 0;
     rw::math::Q from;
@@ -320,38 +327,52 @@ void EITPlugin::button_start()
     path.clear();
     whole_path.clear();
 
+    auto status_lambda = [&](unsigned int i)
+    {
+        ui_label_status->setText(("Status: planning (" + std::to_string(i) + "/" + std::to_string((7*place_position_count)+1) + ")").c_str());
+    };
+
+    status_lambda(0);
     create_trajectory(from, home_Q, extend);
     whole_path.emplace_back(path, trash, false);
+    status_lambda(1);
 
-    for (unsigned int i = 0; i < 1; i++)
+    for (unsigned int i = 0; i < place_position_count; i++)
     {
         // Home to pick approach
         create_trajectory(home_Q, pick_approach_Q, extend);
         whole_path.emplace_back(path, trash, false);
+        status_lambda(7*i+2);
 
         // Pick approach to pick
         create_trajectory(pick_approach_Q, pick_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, false);
+        status_lambda(7*i+3);
 
         // Pick to pick approach
         create_trajectory(pick_Q, pick_approach_Q, extend, 0.1);
         whole_path.emplace_back(path, trash, true);
+        status_lambda(7*i+4);
 
         // Pick approach to place approach
         create_trajectory(pick_approach_Q, place_approach_Qs[i], extend);
         whole_path.emplace_back(path, trash, true);
+        status_lambda(7*i+5);
 
         // Place approach to place
         create_trajectory(place_approach_Qs[i], place_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, true);
+        status_lambda(7*i+6);
 
         // Place to place approach
         create_trajectory(place_Qs[i], place_approach_Qs[i], extend, 0.1);
         whole_path.emplace_back(path, trash, false);
+        status_lambda(7*i+7);
 
         // Place approach to home
         create_trajectory(place_approach_Qs[i], home_Q, extend);
         whole_path.emplace_back(path, trash, false);
+        status_lambda(7*i+8);
     }
 
     /*
