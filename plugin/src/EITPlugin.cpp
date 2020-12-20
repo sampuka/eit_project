@@ -12,6 +12,7 @@ EITPlugin::EITPlugin():
     connect(ui_button_freemode, SIGNAL(pressed()), this, SLOT(button_freemode()));
     connect(ui_button_home, SIGNAL(pressed()), this, SLOT(button_home()));
     connect(ui_button_start, SIGNAL(pressed()), this, SLOT(button_start()));
+    connect(ui_button_perform, SIGNAL(pressed()), this, SLOT(button_perform()));
     connect(ui_checkbox_sync, SIGNAL(clicked(bool)), this, SLOT(sync_pressed(bool)));
 }
 
@@ -296,6 +297,12 @@ void EITPlugin::button_start()
     if (create_whole_path_thread.joinable())
         create_whole_path_thread.join();
     create_whole_path_thread = std::thread(&EITPlugin::create_whole_path, this);
+}
+
+void EITPlugin::button_perform()
+{
+    running = true;
+    path_section = 0;
 }
 
 void EITPlugin::create_whole_path()

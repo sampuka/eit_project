@@ -89,6 +89,13 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QPushButton" name="ui_button_perform">
+      <property name="text">
+       <string>Perform</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
