@@ -4,7 +4,7 @@ rebar placement.
 
 # Compilation
 ```
-cd eiT_project/plugin
+cd eit_project/plugin
 cmake .
 make
 ```
